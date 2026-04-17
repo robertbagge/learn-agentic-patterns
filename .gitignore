@@ -212,7 +212,6 @@ node_modules/
 .yarn/
 .pnp
 .pnp.*
-bun.lockb
 *.tsbuildinfo
 
 # Logs
