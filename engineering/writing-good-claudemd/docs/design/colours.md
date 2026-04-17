@@ -65,6 +65,6 @@
 - Use `--border-accent` sparingly for focus and active states
 
 **DON'T:**
-- Never use pure white (#FFFFF`) as a background
+- Never use pure white (#FFFFFF) as a background
 - Never mix accent colours -- pick one per surface
 - Never use `--text-muted` for essential information

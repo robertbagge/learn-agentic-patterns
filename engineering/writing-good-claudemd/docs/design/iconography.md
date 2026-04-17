@@ -44,14 +44,14 @@
 
 | State | Colour |
 |-------|--------|
-| Default | `#FFFFFF` (`--text-primary`) |
-| Secondary | `#8A8A8A` (`--text-secondary`) |
-| Muted | `#525252` (`--text-muted`) |
-| Active | `#00D4AA` (`--accent-primary`) |
-| Success | `#32D74B` (`--color-success`) |
-| Warning | `#FF9F0A` (`--color-warning`) |
-| Error | `#FF453A` (`--color-error`) |
-| Info | `#64D2FF` (`--color-info`) |
+| Default | #FFFFFF (`--text-primary`) |
+| Secondary | #8A8A8A (`--text-secondary`) |
+| Muted | #525252 (`--text-muted`) |
+| Active | #00D4AA (`--accent-primary`) |
+| Success | #32D74B (`--color-success`) |
+| Warning | #FF9F0A (`--color-warning`) |
+| Error | #FF453A (`--color-error`) |
+| Info | #64D2FF (`--color-info`) |
 
 ## DOs and DON'Ts
 

@@ -30,10 +30,10 @@ Surface hierarchy uses background colour only -- no drop shadows.
 
 | Level | Colour | Usage |
 |-------|--------|-------|
-| Level 0 | `#0C0C0C` | Base canvas |
-| Level 1 | `#1A1A1A` | Cards, sidebars, modals |
-| Level 2 | `#242424` | Inputs, hover states, nested elements |
-| Level 3 | `#2A2A2A` | Interactive hover, pressed states |
+| Level 0 | #0C0C0C | Base canvas |
+| Level 1 | #1A1A1A | Cards, sidebars, modals |
+| Level 2 | #242424 | Inputs, hover states, nested elements |
+| Level 3 | #2A2A2A | Interactive hover, pressed states |
 
 ## DOs and DON'Ts
 
