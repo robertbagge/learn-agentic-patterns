@@ -1,4 +1,4 @@
-# writing-good-claudemd
+# Harness Engineering 1 - Writing a good CLAUDE.MD
 
 The harnessed counterpart to [`base/`](../base/). Same Vite + FastAPI
 scaffold, plus a router-style `CLAUDE.md` and a `docs/` tree that together

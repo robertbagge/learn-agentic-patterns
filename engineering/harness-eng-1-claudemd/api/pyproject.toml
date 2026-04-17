@@ -1,7 +1,7 @@
 [project]
-name = "writing-good-claudemd-api"
+name = "harness-eng-1-claudemd-api"
 version = "0.1.0"
-description = "FastAPI backend for the writing-good-claudemd stage."
+description = "FastAPI backend for the harness-eng-1-claudemd stage."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
