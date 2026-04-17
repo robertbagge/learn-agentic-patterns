@@ -2,26 +2,26 @@
 API_PORT = "9000"
 VITE_API_PORT = "{{env.API_PORT}}"
 
-[tasks."deps:install:api"]
+[tasks."api:deps:install"]
 description = "Install api dependencies"
 dir = "{{config_root}}/api"
 run = "uv sync"
-
-[tasks."deps:install:web"]
-description = "Install web dependencies"
-dir = "{{config_root}}/web"
-run = "bun install"
-
-[tasks."deps:install"]
-description = "Install dependencies for api and web"
-depends = ["deps:install:api", "deps:install:web"]
 
 [tasks."api:dev"]
 description = "Run the FastAPI dev server"
 dir = "{{config_root}}/api"
 run = "uv run fastapi dev --port $API_PORT"
 
+[tasks."web:deps:install"]
+description = "Install web dependencies"
+dir = "{{config_root}}/web"
+run = "bun install"
+
 [tasks."web:dev"]
 description = "Run the Vite dev server"
 dir = "{{config_root}}/web"
 run = "bun run dev"
+
+[tasks."deps:install"]
+description = "Install dependencies for api and web"
+depends = ["api:deps:install", "web:deps:install"]
