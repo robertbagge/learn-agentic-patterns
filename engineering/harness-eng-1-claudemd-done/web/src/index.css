@@ -1,4 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces — docs/design/colours.md */
+  --color-bg-primary: #0C0C0C;
+  --color-bg-card: #1A1A1A;
+  --color-bg-elevated: #242424;
+  --color-bg-hover: #2A2A2A;
+  --color-bg-input: #1A1A1A;
+
+  /* Text */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #8A8A8A;
+  --color-text-muted: #525252;
+  --color-text-inverse: #0C0C0C;
+
+  /* Accents */
+  --color-accent-primary: #00D4AA;
+  --color-accent-primary-soft: #00D4AA20;
+  --color-accent-secondary: #A78BFA;
+  --color-accent-secondary-soft: #A78BFA20;
+  --color-accent-destructive: #FF453A;
+  --color-accent-destructive-soft: #FF453A20;
+  --color-accent-ghost: #FFFFFF;
+  --color-accent-ghost-soft: #FFFFFF10;
+
+  /* Semantic */
+  --color-success: #32D74B;
+  --color-success-soft: #32D74B20;
+  --color-warning: #FF9F0A;
+  --color-warning-soft: #FF9F0A20;
+  --color-error: #FF453A;
+  --color-error-soft: #FF453A20;
+  --color-info: #64D2FF;
+  --color-info-soft: #64D2FF20;
+
+  /* Borders */
+  --color-border-default: #2A2A2A;
+  --color-border-strong: #3A3A3A;
+  --color-border-accent: #00D4AA;
+
+  /* Spacing — docs/design/spacing-and-layout.md */
+  --spacing-2: 2px;
+  --spacing-4: 4px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+
+  /* Radius — docs/design/radius-and-elevation.md */
+  --radius-none: 0px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* Fonts — docs/design/typography.md */
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }

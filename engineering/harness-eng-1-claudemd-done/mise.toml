@@ -29,3 +29,17 @@ depends = ["api:deps:install", "web:deps:install"]
 [tasks.dev]
 description = "Run api and web dev servers in parallel"
 depends = ["api:dev", "web:dev"]
+
+[tasks."api:check"]
+description = "Byte-compile the api to catch syntax/import errors"
+dir = "{{config_root}}/api"
+run = "uv run python -m compileall -q ."
+
+[tasks."web:check"]
+description = "Type-check and build the web bundle"
+dir = "{{config_root}}/web"
+run = "bun run build"
+
+[tasks.check]
+description = "Run checks for api and web"
+depends = ["api:check", "web:check"]
