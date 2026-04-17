@@ -1,8 +1,8 @@
 # base
 
-Starting scaffold for the agentic workflow tutorials. Bare Vite + FastAPI apps, no harness, no conventions.
+The control scaffold — a bare Vite + FastAPI project with no stage-local harness. This is where you run a tutorial's driving prompt (e.g. `/plan build a todo app`) to see what an AI assistant produces without guidance, before comparing against harnessed stages.
 
-This is the starting point a learner clones before running a tutorial's driving prompt (e.g. `/plan build a todo app`).
+The repo root carries a deliberately minimal `CLAUDE.md` (stage-isolation rules only) so this control stays clean.
 
 ## Structure
 
@@ -15,7 +15,7 @@ Run once after cloning:
 
 ```bash
 mise trust          # trust this stage's mise config
-mise install        # install runtimes pinned in mise.toml (bun, python, uv)
+mise install        # install runtimes (bun, python, uv) pinned in ../mise.toml
 mise deps:install   # install api + web dependencies in parallel
 ```
 

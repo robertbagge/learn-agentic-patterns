@@ -1,10 +1,7 @@
 # CLAUDE.md
 
-Find context in the linked files below. They contain conventions, rules,
-and best practices for this codebase. Load as you see fit for the task
-at hand.
+`learn-agentic-patterns` is a multi-stage teaching repo. Each stage folder under `engineering/` (and future groupings) is self-contained.
 
-## Context
+Do not share code, configs, dependencies, or tooling across stages.
 
-- [Project overview](docs/project.md) — use when you need to understand what this project is
-- [Commits](docs/harness/vcs/commits.md) — use when committing changes
+When working inside a stage folder, prefer stage-local context (its `mise.toml`, `README.md`, and — in harnessed stages — its own `CLAUDE.md`) over anything at the repo root. The root level intentionally carries almost no harness so that bare stages can demonstrate what an AI coding assistant produces without guidance.

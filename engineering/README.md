@@ -1,19 +1,15 @@
 # Engineering tutorials
 
-Tutorials that teach agentic patterns for software engineering work.
-
-Each subfolder is a self-contained tutorial stage. See [../docs/project.md](../docs/project.md) for the stage pair pattern.
+Self-contained stages that teach agentic patterns for software engineering. Each stage is a small Vite + FastAPI app — the agent builds or improves it, and you see how the surrounding harness shapes the result.
 
 ## Prerequisites
 
 - [Mise](https://mise.jdx.dev/) installed
 
-## Setup
+## Stages
 
-Run once when you enter this folder:
+- [base/](base/README.md) — bare scaffold, no stage-local harness. Use this as the control: run a driving prompt here first to see what an AI assistant produces without guidance.
 
-```bash
-mise install
-```
+More stages will land as the course develops. Each introduces one harness layer at a time (CLAUDE.md structure, testing conventions, skills, etc.) so you can see each lever in isolation.
 
-This installs the runtimes pinned in `mise.toml` (Bun, Python).
+Each stage README has the full setup flow. Runtimes (Bun, Python, uv) are pinned in this folder's `mise.toml` and inherited by every stage.
