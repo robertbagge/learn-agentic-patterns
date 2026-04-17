@@ -27,20 +27,20 @@ will get you a long way.
 ```typescript
 function UserCard({ name, bio }: { name: string; bio: string }) {
   return (
-    <div className="rounded border p-4 bg-bg">
+    <div className="rounded-lg border border-border-default p-16 bg-card">
       <h3>{name}</h3>
-      <p className="mt-2 text-sm text-muted">{bio}</p>
-      <span className="mt-4 block text-xs text-muted">View profile →</span>
+      <p className="mt-8 text-sm text-text-muted">{bio}</p>
+      <span className="mt-16 block text-xs text-text-muted">View profile →</span>
     </div>
   )
 }
 
 function OrderCard({ id, total }: { id: string; total: string }) {
   return (
-    <div className="rounded border p-4 bg-bg">
+    <div className="rounded-lg border border-border-default p-16 bg-card">
       <h3>Order #{id}</h3>
-      <p className="mt-2 text-sm text-muted">Total: {total}</p>
-      <span className="mt-4 block text-xs text-muted">Manage →</span>
+      <p className="mt-8 text-sm text-text-muted">Total: {total}</p>
+      <span className="mt-16 block text-xs text-text-muted">Manage →</span>
     </div>
   )
 }
@@ -61,10 +61,10 @@ type CardProps = {
 
 function Card({ header, children, footer }: CardProps) {
   return (
-    <div className="rounded border p-4 bg-bg">
+    <div className="rounded-lg border border-border-default p-16 bg-card">
       {header && <h3 className="text-lg font-bold">{header}</h3>}
-      {children && <p className="mt-2 text-sm text-muted">{children}</p>}
-      {footer && <span className="mt-4 block text-xs text-muted">{footer}</span>}
+      {children && <p className="mt-8 text-sm text-text-secondary">{children}</p>}
+      {footer && <span className="mt-16 block text-xs text-text-muted">{footer}</span>}
     </div>
   )
 }
@@ -122,4 +122,4 @@ reuse them instead of home-grown variants.
 ## Related Best Practices
 
 For reusable patterns and utilities, see
-[best-practices.md](../best-practices/index.md)
+[best-practices index](../best-practices/index.md)

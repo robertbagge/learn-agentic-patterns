@@ -3,31 +3,41 @@
 ## Error Taxonomy
 
 * Never surface network errors directly. Translate to UI-level errors that
-  only disclose what they need to
+  only disclose what they need to.
 * Surface domain errors to the UI; log infra errors with context (never to
-  console in prod)
+  the console in prod).
 
 ### UI errors
 
 ```typescript
 class NotFound extends Error {
-  constructor(public id: string, entityType: string) { super("Not Found") }
+  constructor(public id: string, public entityType: string) {
+    super(`${entityType} not found: ${id}`)
+  }
 }
 
 class Unauthorized extends Error {
-  constructor(public id: string, entityType: string) { super("Unauthorized") }
+  constructor(public id: string, public entityType: string) {
+    super(`Unauthorized for ${entityType} ${id}`)
+  }
 }
 
 class Forbidden extends Error {
-  constructor(public id: string, entityType: string) { super("Forbidden") }
+  constructor(public id: string, public entityType: string) {
+    super(`Forbidden for ${entityType} ${id}`)
+  }
 }
 
 class BadRequest extends Error {
-  constructor(public id: string, entityType: string) { super(`NotFound`) }
+  constructor(public id: string, public entityType: string) {
+    super(`Bad request for ${entityType} ${id}`)
+  }
 }
 
 class Conflict extends Error {
-  constructor(public id: string, entityType: string) { super(`Conflict`) }
+  constructor(public id: string, public entityType: string) {
+    super(`Conflict for ${entityType} ${id}`)
+  }
 }
 // ...
 ```

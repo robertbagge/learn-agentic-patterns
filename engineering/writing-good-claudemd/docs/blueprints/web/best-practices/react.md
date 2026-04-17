@@ -17,8 +17,6 @@ interface PlanDetailsDisplayProps {
 }
 
 export function PlanDetailsDisplay({ plan, loading, error }: PlanDetailsDisplayProps) {
-  const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([0]))
-
   if (loading) return <div aria-label="Loading"><Spinner /></div>
   if (error)   return <div role="alert">{error.message}</div>
   if (!plan)   return <div>Not found</div>
@@ -35,13 +33,11 @@ second request.
 
 ```tsx
 import { useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
 
-export function QueriedPlanDetails() {
-  const { planIndex } = useParams<{ planIndex: string }>()
+export function QueriedPlanDetails({ planIndex }: { planIndex: number }) {
   const queryClient = useQueryClient()
   const plans = queryClient.getQueryData<Plan[]>(['plans'])
-  const plan = plans?.[parseInt(planIndex || '0', 10)] ?? null
+  const plan = plans?.[planIndex] ?? null
 
   return <PlanDetailsDisplay plan={plan} />
 }
@@ -53,10 +49,7 @@ Read straight from `localStorage`. Sync API, so no loading or cleanup
 dance — just read once on mount.
 
 ```tsx
-import { useParams } from 'react-router-dom'
-
-export function SavedPlanDetails() {
-  const { id } = useParams<{ id: string }>()
+export function SavedPlanDetails({ id }: { id: string }) {
   const raw = localStorage.getItem(`plan:${id}`)
   const plan = raw ? (JSON.parse(raw) as Plan) : null
 
@@ -64,32 +57,53 @@ export function SavedPlanDetails() {
 }
 ```
 
-If state is large or you need async access, swap `localStorage` for an
-IndexedDB wrapper (e.g. `idb-keyval`). The container then handles
-`loading` / `error` the same way the display component expects:
+If state is large or you need async access, put a thin storage interface
+behind a provider and consume it via a hook. The container then handles
+`loading` / `error` the same way the display component expects — and the
+storage dependency can be swapped for a fake in tests.
 
 ```tsx
-export function SavedPlanDetails() {
-  const { id } = useParams<{ id: string }>()
+// storage.ts — interface + provider seam
+// Named AsyncStorage to avoid colliding with the DOM's global `Storage`.
+interface AsyncStorage {
+  get<T>(key: string): Promise<T | null>
+}
+
+const StorageContext = createContext<AsyncStorage | null>(null)
+export const StorageProvider = StorageContext.Provider
+
+export function useStorage(): AsyncStorage {
+  const s = useContext(StorageContext)
+  if (!s) throw new Error('useStorage must be used within StorageProvider')
+  return s
+}
+```
+
+```tsx
+// SavedPlanDetails.tsx
+export function SavedPlanDetails({ id }: { id: string }) {
+  const storage = useStorage()
   const [plan, setPlan] = useState<Plan | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    get<Plan>(`plan:${id}`)
-      .then(p => { if (!cancelled) setPlan(p ?? null) })
+    storage.get<Plan>(`plan:${id}`)
+      .then(p => { if (!cancelled) setPlan(p) })
       .catch(e => { if (!cancelled) setError(e) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [id])
+  }, [id, storage])
 
   return <PlanDetailsDisplay plan={plan} loading={loading} error={error} />
 }
 ```
 
-The cancelled flag is the cleanup pattern — set on unmount so a late
-resolver can't call `setState` on an unmounted component.
+The production-time `AsyncStorage` is typically a thin wrapper over
+`idb-keyval` or similar; tests pass a fake (see below). The `cancelled`
+flag is the cleanup pattern — set on unmount so a late resolver can't
+call `setState` on an unmounted component.
 
 ## Testing without module mocking
 
@@ -110,7 +124,6 @@ module that exports the storage client:
 
 ```tsx
 import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 test('loads from storage', async () => {
   const fakeStorage = {
@@ -119,11 +132,7 @@ test('loads from storage', async () => {
 
   render(
     <StorageProvider value={fakeStorage}>
-      <MemoryRouter initialEntries={['/plans/123']}>
-        <Routes>
-          <Route path="/plans/:id" element={<SavedPlanDetails />} />
-        </Routes>
-      </MemoryRouter>
+      <SavedPlanDetails id="123" />
     </StorageProvider>
   )
 

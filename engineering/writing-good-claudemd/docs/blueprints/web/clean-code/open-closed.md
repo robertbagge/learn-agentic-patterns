@@ -89,7 +89,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
   }
 
   return (
-    <div className="flex gap-3 p-3" onClick={handlePress}>
+    <div className="flex gap-12 p-12" onClick={handlePress}>
       <div>{getIcon()}</div>
       <div className="flex-1">
         <h4>{notification.title}</h4>
@@ -136,7 +136,7 @@ function buildDefaultRenderers(logger: Logger): Record<string, Renderer> {
 function NotificationItem({ n, r }: { n: Notification; r: Renderer }) {
   const Icon = r.icon
   return (
-    <div className="flex gap-3 p-3" onClick={() => r.onClick?.(n)}>
+    <div className="flex gap-12 p-12" onClick={() => r.onClick?.(n)}>
       <div><Icon size={20} /></div>
       <div className="flex-1">
         <h4>{n.title}</h4>
@@ -253,4 +253,4 @@ Keep callback signatures and controlled props consistent across variants
 ## Related Best Practices
 
 For component composition and patterns, see
-[best-practices.md](../best-practices/index.md)
+[best-practices index](../best-practices/index.md)

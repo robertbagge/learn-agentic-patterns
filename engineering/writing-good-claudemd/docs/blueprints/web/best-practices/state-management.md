@@ -52,27 +52,34 @@ type ApiClients = {
 
 const ApiContext = createContext<ApiClients | null>(null)
 
-function ApiProvider({ children, apiClients }: {
-  children: React.ReactNode; apiClients: ApiClients
+function ApiProvider({ children, messageApi, userApi }: {
+  children: React.ReactNode
+  messageApi: MessageApi
+  userApi: UserApi
 }) {
-  return <ApiContext.Provider value={apiClients}>{children}</ApiContext.Provider>
+  // Build the value inline, then memoize so the object identity is stable
+  // across re-renders. Without the memo, every render creates a fresh object
+  // and every consumer re-renders.
+  const value = useMemo(
+    () => ({ messageApi, userApi }),
+    [messageApi, userApi],
+  )
+  return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>
 }
 
 function useMessageApi(): MessageApi {
   const apiClients = useContext(ApiContext)
-  const messageApi = apiClients?.messageApi
-  if (!messageApi) {
+  if (!apiClients) {
     throw new Error('useMessageApi must be used within ApiProvider')
   }
-  return messageApi
+  return apiClients.messageApi
 }
 
 function useUserApi(): UserApi {
   const apiClients = useContext(ApiContext)
-  const userApi = apiClients?.userApi
-  if (!userApi) {
+  if (!apiClients) {
     throw new Error('useUserApi must be used within ApiProvider')
   }
-  return userApi
+  return apiClients.userApi
 }
 ```

@@ -21,10 +21,10 @@ and types. It exposes its public API through an `index.ts` barrel.
 ```
 features/todos/
 ├── components/
-│   ├── TodoList.tsx
-│   └── TodoItem.tsx
+│   ├── todo-list.tsx
+│   └── todo-item.tsx
 ├── hooks/
-│   └── useTodos.ts
+│   └── use-todos.ts
 ├── types.ts
 └── index.ts     # Public API: export { TodoList, useTodos, type Todo }
 ```

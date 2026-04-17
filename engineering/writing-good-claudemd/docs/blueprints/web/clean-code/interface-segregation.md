@@ -49,7 +49,7 @@ function ProfileHeader({
   onLogout,
 }: Props) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-12">
       <img
         src={user.profile?.avatar ?? 'https://placeholder.co/40'}
         alt={user.name}
@@ -87,7 +87,7 @@ type HeaderProps = {
 
 function ProfileHeader({ userName, userAvatar, onLogout }: HeaderProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-12">
       <Avatar uri={userAvatar} label={userName} />
       <span>{userName}</span>
       <button onClick={onLogout}>Logout</button>
@@ -140,4 +140,4 @@ function ProfileHeader({ userName, userAvatar, onLogout }: HeaderProps) {
 ## Related Best Practices
 
 For component composition and prop patterns, see
-[best-practices.md](../best-practices/index.md)
+[best-practices index](../best-practices/index.md)

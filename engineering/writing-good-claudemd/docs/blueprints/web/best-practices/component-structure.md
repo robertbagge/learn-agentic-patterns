@@ -3,7 +3,7 @@
 ## Goals
 
 * Separate concerns between display, data loading & business logic
-* Applies the [single-responsibility](../clean-code/single-responsibility.md)
+* Applies the [single-responsibility](../clean-code/single-responsibility.md) principle
 
 ## Use composition to allow for reuse and efficient renders
 
@@ -29,7 +29,7 @@ function Layout({ header, sidebar, children }: LayoutProps) {
 ### 1. Display Components at the core
 
 * Pure functions that render UI based on props
-* Only cares about displaying information and other components
+* Concerned only with displaying information, composing smaller components
 * No business logic or side effects
 * Example:
 
@@ -42,7 +42,7 @@ interface Props {
 
 function UserCardDisplay({ user, onEdit, onDelete }: Props) {
   return (
-    <div className="flex flex-col gap-2 p-3">
+    <div className="flex flex-col gap-8 p-12">
       <h3>{user.name}</h3>
       <p>{user.email}</p>
       <button onClick={() => onEdit(user)}>Edit</button>
@@ -56,7 +56,7 @@ function UserCardDisplay({ user, onEdit, onDelete }: Props) {
 
 * Handle data fetching and render logic via hooks
 * Pass data and callbacks to display components
-* Does not care about display at all
+* Leaves presentation entirely to the display component
 * Example:
 
 ```typescript
@@ -81,24 +81,41 @@ function UserCard({ userId }: Props) {
 
 ```tsx
 // Display (pure presentation)
-function PlanDisplay({ plan, loading, error }) {
+function PlanDisplay({ plan, loading, error }: {
+  plan: Plan | null
+  loading?: boolean
+  error?: Error | null
+}) {
   if (loading) return <Spinner />
   if (error) return <p role="alert">{error.message}</p>
+  if (!plan) return <div>Not found</div>
   return <div>{plan.title}</div>
 }
 
 // Container 1: From cache
 function CachedPlan() {
   const queryClient = useQueryClient()
-  const plan = queryClient.getQueryData(['plans'])?.[0]
+  const plan = queryClient.getQueryData<Plan[]>(['plans'])?.[0] ?? null
   return <PlanDisplay plan={plan} />
 }
 
 // Container 2: From storage
 function StoredPlan() {
   const storage = useStorage()
-  const { data, loading, error } = useAsync(() => storage.get('plan'))
-  return <PlanDisplay plan={data} loading={loading} error={error} />
+  const [plan, setPlan] = useState<Plan | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    storage.get<Plan>('plan')
+      .then(p => { if (!cancelled) setPlan(p) })
+      .catch(e => { if (!cancelled) setError(e) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [storage])
+
+  return <PlanDisplay plan={plan} loading={loading} error={error} />
 }
 ```
 
@@ -129,7 +146,7 @@ function UserSection({ userId }: Props) {
 * Return data and functions for components to use
 * Accept dependencies for testability
 * Wrap in hook that loads dependencies from provider
-* Applies the [dependency-inversion](../clean-code/dependency-inversion.md)
+* Applies the [dependency-inversion](../clean-code/dependency-inversion.md) principle
 
 ```typescript
 type UseUserResult = {

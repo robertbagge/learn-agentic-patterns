@@ -149,7 +149,7 @@ function TypedInput<T>({
         disabled={disabled}
         placeholder={placeholder}
       />
-      {error && <span className="text-red-600">{error}</span>}
+      {error && <span className="text-accent-destructive">{error}</span>}
     </div>
   )
 }
@@ -246,4 +246,4 @@ the same; avoid blind prop spreading that masks incompatibilities
 ## Related Best Practices
 
 For component interfaces and testing patterns, see
-[best-practices.md](../best-practices/index.md)
+[best-practices index](../best-practices/index.md)

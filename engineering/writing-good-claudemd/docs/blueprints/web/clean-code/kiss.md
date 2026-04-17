@@ -142,4 +142,4 @@ big lists, stabilize with `useCallback`.
 ## Related Best Practices
 
 For pragmatic approaches and patterns, see
-[best-practices.md](../best-practices/index.md)
+[best-practices index](../best-practices/index.md)

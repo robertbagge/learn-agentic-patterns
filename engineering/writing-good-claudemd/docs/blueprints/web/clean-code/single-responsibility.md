@@ -86,7 +86,7 @@ function ActivityPanel({ activityApi }: { activityApi: ActivityApi }) {
           <button onClick={() => setFilter('mine')}>Mine</button>
         </div>
       </header>
-      <ul className="mt-3">
+      <ul className="mt-12">
         {visible.map((a) => (
           <li key={a.id} className="flex gap-2 items-center">
             <span>{a.user}</span><span> — </span><span>{a.message}</span>
@@ -237,4 +237,4 @@ avoid sprinkling loading UI inside leaf components
 ## Related Best Practices
 
 For component structure, testing patterns, and state management, see
-[best-practices.md](../best-practices/index.md)
+[best-practices index](../best-practices/index.md)

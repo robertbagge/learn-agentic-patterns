@@ -3,8 +3,8 @@
 ## Goals
 
 * Tests resembling the way the software is used
-* Good test coverage while keep tests small
-* Provide early feedback on render inefficiences
+* Good test coverage while keeping tests small
+* Provide early feedback on render inefficiencies
 
 ## Component Testing
 
@@ -58,7 +58,7 @@ test('submit form succeeds when form is valid and createUser returns success',
   * First render
   * Render after data has loaded
 * Test to check for unexpected re-renders. Component should not re-render if
-  props stays the same.
+  props stay the same.
 
 ### 3. Snapshot testing for critical UI components
 
