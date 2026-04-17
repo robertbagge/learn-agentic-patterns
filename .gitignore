@@ -205,3 +205,45 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Node / Bun
+node_modules/
+.npm
+.yarn/
+.pnp
+.pnp.*
+bun.lockb
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Vite
+dist-ssr/
+.vite/
+*.local
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/settings.local.json
+.claude/worktrees/
+.claude/shell-snapshots/
+.claude/.credentials.json
+.claude/statsig/
+.claude/todos/
+CLAUDE.local.md
