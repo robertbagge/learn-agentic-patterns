@@ -1,13 +1,21 @@
-# base
+# writing-good-claudemd
 
-The control scaffold — a bare Vite + FastAPI project with no stage-local harness. This is where you run a tutorial's driving prompt (e.g. `/plan build a todo app`) to see what an AI assistant produces without guidance, before comparing against harnessed stages.
-
-The repo root carries a deliberately minimal `CLAUDE.md` (stage-isolation rules only) so this control stays clean.
+The harnessed counterpart to [`base/`](../base/). Same Vite + FastAPI
+scaffold, plus a `docs/` tree that gives an AI assistant the context it
+needs to match how this team actually builds. A router-style `CLAUDE.md`
+(to be added separately) points at the docs below. Run the same driving
+prompt here (e.g. `/plan build a todo app`) and compare the output
+against `base/` — the difference is what the harness buys you.
 
 ## Structure
 
 - `api/` — FastAPI backend, managed with uv.
 - `web/` — Vite frontend, managed with bun.
+- `docs/` — context to be loaded by `CLAUDE.md`:
+  - `project.md` — product identity, users, scope, non-goals.
+  - `architecture.md` — process shape, data flow, persistence.
+  - `design/` — design system (colours, spacing, radius, typography, icons, rules).
+  - `blueprints/web/` — opinionated guide for building with Vite + React + Tailwind (best practices + clean-code principles).
 
 ## Setup
 
