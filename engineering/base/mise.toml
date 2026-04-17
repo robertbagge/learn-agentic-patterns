@@ -25,3 +25,7 @@ run = "bun run dev"
 [tasks."deps:install"]
 description = "Install dependencies for api and web"
 depends = ["api:deps:install", "web:deps:install"]
+
+[tasks.dev]
+description = "Run api and web dev servers in parallel"
+depends = ["api:dev", "web:dev"]
