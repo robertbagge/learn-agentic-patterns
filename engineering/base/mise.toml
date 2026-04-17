@@ -1,0 +1,13 @@
+[env]
+API_PORT = "8000"
+VITE_API_PORT = "{{env.API_PORT}}"
+
+[tasks."api:dev"]
+description = "Run the FastAPI dev server"
+dir = "{{config_root}}/api"
+run = "uv run fastapi dev --port $API_PORT"
+
+[tasks."web:dev"]
+description = "Run the Vite dev server"
+dir = "{{config_root}}/web"
+run = "bun run dev"
