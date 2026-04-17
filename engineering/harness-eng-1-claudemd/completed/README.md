@@ -1,10 +1,10 @@
 # Harness Engineering 1 - Writing a good CLAUDE.MD
 
-The harnessed counterpart to [`base/`](../base/). Same Vite + FastAPI
+The harnessed counterpart to [`base/starter`](../../base/starter/). Same Vite + FastAPI
 scaffold, plus a router-style `CLAUDE.md` and a `docs/` tree that together
 give an AI assistant the context it needs to match how this team actually
 builds. Run the same driving prompt here (e.g. `/plan build a todo app`)
-and compare the output against `base/` — the difference is what the
+and compare the output against `base/starter` — the difference is what the
 harness buys you.
 
 ## Structure
@@ -26,7 +26,7 @@ Run once after cloning:
 
 ```bash
 mise trust          # trust this stage's mise config
-mise install        # install runtimes (bun, python, uv) pinned in ../mise.toml
+mise install        # install runtimes (bun, python, uv) pinned in ../../mise.toml
 mise deps:install   # install api + web dependencies in parallel
 ```
 

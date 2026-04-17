@@ -15,7 +15,7 @@ Run once after cloning:
 
 ```bash
 mise trust          # trust this stage's mise config
-mise install        # install runtimes (bun, python, uv) pinned in ../mise.toml
+mise install        # install runtimes (bun, python, uv) pinned in ../../mise.toml
 mise deps:install   # install api + web dependencies in parallel
 ```
 

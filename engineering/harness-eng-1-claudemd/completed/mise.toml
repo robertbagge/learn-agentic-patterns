@@ -1,5 +1,5 @@
 [env]
-API_PORT = "9003"
+API_PORT = "9004"
 VITE_API_PORT = "{{env.API_PORT}}"
 
 [tasks."api:deps:install"]
