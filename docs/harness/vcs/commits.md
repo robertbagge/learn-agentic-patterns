@@ -6,6 +6,7 @@
 - Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 
 ## DOs
+- Keep commits as small as possible, but in coherent semantic chunks
 - Write the description in the imperative mood ("add login", not "added login").
 - Keep the subject line under 72 characters.
 - Use a scope when the change is localised (e.g. `feat(api): add todo endpoint`).
