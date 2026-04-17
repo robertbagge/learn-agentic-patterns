@@ -7,7 +7,8 @@
 - Stack: Vite (frontend) + FastAPI (backend), managed with Bun.
 
 ## Structure
-- Each top-level folder is a self-contained tutorial stage (polyrepo style). Do not share code between folders.
+- Tutorials are grouped by audience at the top level (e.g. `engineering/`). More groupings will be added over time.
+- Within a grouping, each folder is a self-contained tutorial stage (polyrepo style). Do not share code between stage folders.
 - Stages come in pairs:
   - `<stage>/` — the starting point the learner begins from.
   - `<stage>-done/` — the result after running the tutorial's driving prompt.
