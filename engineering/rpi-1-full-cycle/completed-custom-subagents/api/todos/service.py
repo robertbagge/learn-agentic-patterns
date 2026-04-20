@@ -6,11 +6,15 @@ from todos.exceptions import TodoNotFound
 from todos.schemas import TodoCreate, TodoUpdate
 
 
-PRIORITY_RANK = {"high": 3, "medium": 2, "low": 1}
+STATUS_ORDER = {"todo": 0, "doing": 1, "done": 2}
 
 
 def _now() -> str:
     return datetime.now(UTC).isoformat()
+
+
+def _next_position(items: list[dict], status: str) -> int:
+    return max((t["position"] for t in items if t["status"] == status), default=0) + 1000
 
 
 class TodoService:
@@ -19,22 +23,20 @@ class TodoService:
 
     def list(self) -> list[dict]:
         items = self._storage.load()
-        return sorted(
-            items,
-            key=lambda t: (-PRIORITY_RANK[t["priority"]], t["created_at"]),
-        )
+        return sorted(items, key=lambda t: (STATUS_ORDER[t["status"]], t["position"]))
 
     def create(self, data: TodoCreate) -> dict:
         now = _now()
+        items = self._storage.load()
         todo = {
             "id": str(uuid4()),
             "title": data.title,
             "priority": data.priority,
-            "completed": False,
+            "status": data.status,
+            "position": _next_position(items, data.status),
             "created_at": now,
             "updated_at": now,
         }
-        items = self._storage.load()
         items.append(todo)
         self._storage.save(items)
         return todo

@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Protocol
 
@@ -19,5 +20,9 @@ class JsonFileStorage:
             return json.load(f)
 
     def save(self, items: list[dict]) -> None:
-        with self._path.open("w", encoding="utf-8") as f:
+        tmp = self._path.with_name(f"{self._path.name}.tmp")
+        with tmp.open("w", encoding="utf-8") as f:
             json.dump(items, f, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, self._path)

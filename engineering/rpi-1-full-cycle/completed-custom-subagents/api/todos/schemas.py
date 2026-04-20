@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 Priority = Literal["low", "medium", "high"]
+Status = Literal["todo", "doing", "done"]
 
 
 class AppBaseModel(BaseModel):
@@ -14,6 +15,7 @@ class AppBaseModel(BaseModel):
 class TodoCreate(AppBaseModel):
     title: str = Field(min_length=1, max_length=200)
     priority: Priority = "medium"
+    status: Status = "todo"
 
     @field_validator("title")
     @classmethod
@@ -27,7 +29,7 @@ class TodoCreate(AppBaseModel):
 class TodoUpdate(AppBaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     priority: Priority | None = None
-    completed: bool | None = None
+    status: Status | None = None
 
     @field_validator("title")
     @classmethod
@@ -44,6 +46,12 @@ class TodoResponse(AppBaseModel):
     id: str
     title: str
     priority: Priority
-    completed: bool
+    status: Status
+    position: int
     created_at: datetime
     updated_at: datetime
+
+
+class TodoMove(AppBaseModel):
+    status: Status
+    position: int
