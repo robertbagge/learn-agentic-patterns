@@ -332,6 +332,47 @@ At the end of Phase 5 the route renders and shows sorted cards per column; DnD s
 43. Remove now-unused imports (`Checkbox` from list view, any `completed` references in fixtures).
 44. Smoke-test paths manually (see §6 Testing strategy).
 
+### Phase dependencies
+
+*Intent:* clarify which phases must be sequential and where work can fork. Solo execution follows the top-to-bottom phase numbering; with two people the only useful parallelism is Phase 6 ↔ Phase 7 once Phase 5 lands.
+
+```mermaid
+flowchart TD
+  P1[Phase 1: API schema and storage]
+  P2[Phase 2: API move endpoint]
+  P3[Phase 3: Optimistic useTodos]
+  P4[Phase 4: Router and list view]
+  P5[Phase 5: Board shell]
+  P6[Phase 6: DnD wiring]
+  P7[Phase 7: Create dialog]
+  P8[Phase 8: Polish]
+
+  P1 --> P2 --> P3 --> P4 --> P5
+  P5 --> P6 --> P8
+  P5 --> P7 --> P8
+```
+
+**Critical path (must be sequential): Phase 1 → 2 → 3 → 4 → 5.**
+
+- Phase 1 is the foundation; every other phase consumes the new `status` / `position` schema.
+- Phase 2 needs Phase 1's schema (uses `TodoMove`, reads `position`).
+- Phase 3's `move` mutation needs Phase 2's `/move` endpoint to hit; its types mirror Phase 1.
+- Phase 4's list-view refactor (status Select replacing the checkbox) consumes Phase 3's updated `useTodos` return. The router setup alone could theoretically land earlier, but splitting Phase 4 adds more coordination than it saves.
+- Phase 5 needs the `/board` route to exist (Phase 4) and `useTodos` to expose `move` (Phase 3).
+
+**Parallelisable fork after Phase 5: Phases 6 and 7.**
+
+- Phase 6 (DnD wiring) extends `board-page.tsx` with `<DndContext>` and adds `sortable-card.tsx`, `board-dnd.ts`.
+- Phase 7 (Create dialog) extends `board-page.tsx` with a dialog trigger and adds `todo-create-dialog.tsx`, splits `todo-create-form.tsx`.
+- Both edit `board-page.tsx`, so merge conflicts there are real but shallow (different JSX regions). Rest of the files are disjoint.
+
+**Join: Phase 8 runs after both 6 and 7 ship**, since its polish touches loading/error/toast/focus surfaces on both the board page and the create path.
+
+**Within-phase parallelism worth knowing about**
+
+- Phase 1 step 1 (storage atomicity) is independent of steps 2–7 (schema) and can be reviewed / committed separately.
+- Phase 4 step 19 (open decision — list-view affordance) blocks steps 20–21 until confirmed. Router steps 14–17 don't block on this.
+
 ## 6. Testing strategy
 
 No automated-test harness exists in the stage today (no `tests/` directory under `api/`, no RTL/Vitest config under `web/`). Introducing one is a larger investment than this ticket warrants; automated coverage — axe-core for a11y, Playwright for DnD, Vitest+RTL for `useTodos` rollback — is listed under Follow-ups → Test + infra.

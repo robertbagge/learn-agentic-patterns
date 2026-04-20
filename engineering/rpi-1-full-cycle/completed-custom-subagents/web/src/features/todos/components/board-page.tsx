@@ -1,17 +1,39 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Button } from '../../../components/button'
 import { useToast } from '../../../components/toast'
+import { handleDragEnd, makeAnnouncements } from '../board-dnd'
 import { useTodos } from '../hooks/use-todos'
 import { STATUS_COLUMNS, type Status, type Todo } from '../types'
+import { BoardCard } from './board-card'
 import { BoardLayout } from './board-layout'
 import { Column } from './column'
 import { ConfirmDeleteDialog } from './confirm-delete-dialog'
 
 export function BoardPage() {
-  const { todos, remove } = useTodos()
+  const { todos, move, remove } = useTodos()
   const toast = useToast()
   const [pendingDelete, setPendingDelete] = useState<Todo | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+  const announcements = useMemo(() => makeAnnouncements(todos), [todos])
+  const activeCard = activeId ? todos.find((t) => t.id === activeId) ?? null : null
 
   const handleAdd = (_status: Status) => {
     // wired in Phase 7 (TodoCreateDialog)
@@ -31,6 +53,30 @@ export function BoardPage() {
     }
   }
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id))
+  }
+
+  const handleDragEndEvent = async (event: DragEndEvent) => {
+    const dragged = todos.find((t) => t.id === String(event.active.id))
+    const result = handleDragEnd(event, todos)
+    setActiveId(null)
+    if (!result || !dragged) return
+
+    const primary = result.moves.find((m) => m.id === dragged.id)
+    const destLabel = STATUS_COLUMNS.find((c) => c.value === primary?.status)?.label ?? ''
+    try {
+      for (const m of result.moves) {
+        await move(m.id, { status: m.status, position: m.position })
+      }
+      if (primary && primary.status !== dragged.status) {
+        toast.show(`Moved "${dragged.title}" to ${destLabel}`)
+      }
+    } catch (err) {
+      toast.show(err instanceof Error ? err.message : 'Failed to move task', 'error')
+    }
+  }
+
   return (
     <main className="flex flex-col gap-32 px-32 py-48">
       <header className="flex items-center justify-between gap-16">
@@ -41,18 +87,30 @@ export function BoardPage() {
           + New task
         </Button>
       </header>
-      <BoardLayout>
-        {STATUS_COLUMNS.map(({ value, label }) => (
-          <Column
-            key={value}
-            status={value}
-            label={label}
-            todos={todos}
-            onAdd={handleAdd}
-            onRequestDelete={setPendingDelete}
-          />
-        ))}
-      </BoardLayout>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        accessibility={{ announcements }}
+        onDragStart={handleDragStart}
+        onDragEnd={(event) => void handleDragEndEvent(event)}
+        onDragCancel={() => setActiveId(null)}
+      >
+        <BoardLayout>
+          {STATUS_COLUMNS.map(({ value, label }) => (
+            <Column
+              key={value}
+              status={value}
+              label={label}
+              todos={todos}
+              onAdd={handleAdd}
+              onRequestDelete={setPendingDelete}
+            />
+          ))}
+        </BoardLayout>
+        <DragOverlay>
+          {activeCard ? <BoardCard todo={activeCard} onRequestDelete={() => {}} /> : null}
+        </DragOverlay>
+      </DndContext>
       <ConfirmDeleteDialog
         title={pendingDelete?.title ?? ''}
         open={pendingDelete !== null}
