@@ -12,6 +12,8 @@ import {
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Button } from '../../../components/button'
+import { ErrorState } from '../../../components/error-state'
+import { Skeleton } from '../../../components/skeleton'
 import { useToast } from '../../../components/toast'
 import { handleDragEnd, makeAnnouncements } from '../board-dnd'
 import { useTodos } from '../hooks/use-todos'
@@ -23,7 +25,7 @@ import { ConfirmDeleteDialog } from './confirm-delete-dialog'
 import { TodoCreateDialog } from './todo-create-dialog'
 
 export function BoardPage() {
-  const { todos, create, move, remove } = useTodos()
+  const { todos, status, error, refetch, create, move, remove } = useTodos()
   const toast = useToast()
   const [pendingDelete, setPendingDelete] = useState<Todo | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -89,30 +91,56 @@ export function BoardPage() {
           + New task
         </Button>
       </header>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        accessibility={{ announcements }}
-        onDragStart={handleDragStart}
-        onDragEnd={(event) => void handleDragEndEvent(event)}
-        onDragCancel={() => setActiveId(null)}
-      >
+      {status === 'loading' && (
         <BoardLayout>
           {STATUS_COLUMNS.map(({ value, label }) => (
-            <Column
+            <section
               key={value}
-              status={value}
-              label={label}
-              todos={todos}
-              onAdd={handleAdd}
-              onRequestDelete={setPendingDelete}
-            />
+              className="flex flex-col gap-12 bg-bg-card rounded-lg p-16"
+              aria-busy="true"
+            >
+              <h2 className="font-display text-[20px] font-semibold leading-none text-text-primary">
+                {label}
+              </h2>
+              <div className="flex flex-col gap-8">
+                <Skeleton className="h-56" />
+                <Skeleton className="h-56" />
+                <Skeleton className="h-56" />
+                <Skeleton className="h-56" />
+              </div>
+            </section>
           ))}
         </BoardLayout>
-        <DragOverlay>
-          {activeCard ? <BoardCard todo={activeCard} onRequestDelete={() => {}} /> : null}
-        </DragOverlay>
-      </DndContext>
+      )}
+      {status === 'error' && (
+        <ErrorState message={error ?? 'Could not load the board.'} onRetry={() => void refetch()} />
+      )}
+      {status === 'success' && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          accessibility={{ announcements }}
+          onDragStart={handleDragStart}
+          onDragEnd={(event) => void handleDragEndEvent(event)}
+          onDragCancel={() => setActiveId(null)}
+        >
+          <BoardLayout>
+            {STATUS_COLUMNS.map(({ value, label }) => (
+              <Column
+                key={value}
+                status={value}
+                label={label}
+                todos={todos}
+                onAdd={handleAdd}
+                onRequestDelete={setPendingDelete}
+              />
+            ))}
+          </BoardLayout>
+          <DragOverlay>
+            {activeCard ? <BoardCard todo={activeCard} onRequestDelete={() => {}} /> : null}
+          </DragOverlay>
+        </DndContext>
+      )}
       <ConfirmDeleteDialog
         title={pendingDelete?.title ?? ''}
         open={pendingDelete !== null}
