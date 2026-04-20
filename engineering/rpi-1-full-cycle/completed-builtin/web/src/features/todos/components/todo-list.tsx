@@ -43,8 +43,9 @@ export function TodoList({ todos, status, error, onRetry, onUpdate, onRemove, on
 
   const handleToggle = (todo: Todo) =>
     withBusy(todo.id, async () => {
-      await onUpdate(todo.id, { completed: !todo.completed })
-      toast.show(todo.completed ? 'Marked incomplete' : 'Marked complete')
+      const done = todo.status === 'done'
+      await onUpdate(todo.id, { status: done ? 'todo' : 'done' })
+      toast.show(done ? 'Marked incomplete' : 'Marked complete')
     })
 
   const handleRename = (todo: Todo, title: string) =>
@@ -74,7 +75,7 @@ export function TodoList({ todos, status, error, onRetry, onUpdate, onRemove, on
   }
 
   const total = todos.length
-  const completed = todos.filter((t) => t.completed).length
+  const completed = todos.filter((t) => t.status === 'done').length
 
   return (
     <Card>

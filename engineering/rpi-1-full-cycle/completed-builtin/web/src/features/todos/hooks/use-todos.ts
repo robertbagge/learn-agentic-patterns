@@ -1,22 +1,23 @@
 import { useCallback, useEffect, useState } from 'react'
 import { todosApi } from '../api'
-import type { Todo, TodoCreate, TodoUpdate } from '../types'
+import type { ReorderBody, Todo, TodoCreate, TodoUpdate } from '../types'
 
-type Status = 'loading' | 'success' | 'error'
+type LoadStatus = 'loading' | 'success' | 'error'
 
 export type UseTodosResult = {
   todos: Todo[]
-  status: Status
+  status: LoadStatus
   error: string | null
   refetch: () => Promise<void>
   create: (body: TodoCreate) => Promise<Todo>
   update: (id: string, body: TodoUpdate) => Promise<Todo>
   remove: (id: string) => Promise<void>
+  reorder: (body: ReorderBody, optimisticNext?: Todo[]) => Promise<Todo[]>
 }
 
 export function useTodos(): UseTodosResult {
   const [todos, setTodos] = useState<Todo[]>([])
-  const [status, setStatus] = useState<Status>('loading')
+  const [status, setStatus] = useState<LoadStatus>('loading')
   const [error, setError] = useState<string | null>(null)
 
   const refetch = useCallback(async () => {
@@ -62,5 +63,20 @@ export function useTodos(): UseTodosResult {
     [refetch],
   )
 
-  return { todos, status, error, refetch, create, update, remove }
+  const reorder = useCallback(
+    async (body: ReorderBody, optimisticNext?: Todo[]) => {
+      if (optimisticNext) setTodos(optimisticNext)
+      try {
+        const items = await todosApi.reorder(body)
+        setTodos(items)
+        return items
+      } catch (e) {
+        await refetch()
+        throw e
+      }
+    },
+    [refetch],
+  )
+
+  return { todos, status, error, refetch, create, update, remove, reorder }
 }

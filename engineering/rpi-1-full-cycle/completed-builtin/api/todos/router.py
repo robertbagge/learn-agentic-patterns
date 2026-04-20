@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response, status
 
 from todos.dependencies import TodoServiceDep
-from todos.schemas import TodoCreate, TodoResponse, TodoUpdate
+from todos.schemas import ReorderRequest, TodoCreate, TodoResponse, TodoUpdate
 
 
 router = APIRouter(prefix="/todos", tags=["todos"])
@@ -26,3 +26,8 @@ def update_todo(todo_id: str, body: TodoUpdate, service: TodoServiceDep) -> Todo
 def delete_todo(todo_id: str, service: TodoServiceDep) -> Response:
     service.delete(todo_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/reorder")
+def reorder_todos(body: ReorderRequest, service: TodoServiceDep) -> list[TodoResponse]:
+    return [TodoResponse.model_validate(t) for t in service.reorder(body)]
