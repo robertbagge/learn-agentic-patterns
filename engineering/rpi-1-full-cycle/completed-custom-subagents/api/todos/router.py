@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response, status
 
 from todos.dependencies import TodoServiceDep
-from todos.schemas import TodoCreate, TodoResponse, TodoUpdate
+from todos.schemas import TodoCreate, TodoMove, TodoResponse, TodoUpdate
 
 
 router = APIRouter(prefix="/todos", tags=["todos"])
@@ -20,6 +20,11 @@ def create_todo(body: TodoCreate, service: TodoServiceDep) -> TodoResponse:
 @router.patch("/{todo_id}")
 def update_todo(todo_id: str, body: TodoUpdate, service: TodoServiceDep) -> TodoResponse:
     return TodoResponse.model_validate(service.update(todo_id, body))
+
+
+@router.patch("/{todo_id}/move")
+def move_todo(todo_id: str, body: TodoMove, service: TodoServiceDep) -> TodoResponse:
+    return TodoResponse.model_validate(service.move(todo_id, body))
 
 
 @router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)

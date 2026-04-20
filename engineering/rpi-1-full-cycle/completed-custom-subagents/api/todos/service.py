@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from core.storage import Storage
 from todos.exceptions import TodoNotFound
-from todos.schemas import TodoCreate, TodoUpdate
+from todos.schemas import TodoCreate, TodoMove, TodoUpdate
 
 
 STATUS_ORDER = {"todo": 0, "doing": 1, "done": 2}
@@ -47,6 +47,17 @@ class TodoService:
             if todo["id"] == todo_id:
                 patch = data.model_dump(exclude_unset=True)
                 todo.update(patch)
+                todo["updated_at"] = _now()
+                self._storage.save(items)
+                return todo
+        raise TodoNotFound(todo_id)
+
+    def move(self, todo_id: str, data: TodoMove) -> dict:
+        items = self._storage.load()
+        for todo in items:
+            if todo["id"] == todo_id:
+                todo["status"] = data.status
+                todo["position"] = data.position
                 todo["updated_at"] = _now()
                 self._storage.save(items)
                 return todo
