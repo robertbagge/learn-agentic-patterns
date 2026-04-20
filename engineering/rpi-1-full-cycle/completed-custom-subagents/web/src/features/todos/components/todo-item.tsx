@@ -68,10 +68,10 @@ export function TodoItem({
   return (
     <div className="flex items-center gap-12 py-12 border-b border-border-default last:border-b-0">
       <Checkbox
-        checked={todo.completed}
+        checked={todo.status === 'done'}
         onChange={onToggle}
         disabled={disabled}
-        aria-label={`Mark "${todo.title}" ${todo.completed ? 'incomplete' : 'complete'}`}
+        aria-label={`Mark "${todo.title}" ${todo.status === 'done' ? 'incomplete' : 'complete'}`}
       />
       <div className="flex-1 min-w-0">
         {editing ? (
@@ -92,7 +92,7 @@ export function TodoItem({
             className={clsx(
               'w-full text-left text-sm truncate rounded-sm px-8 py-4 -mx-8',
               'hover:bg-bg-hover focus-visible:outline-2 focus-visible:outline-border-accent',
-              todo.completed && 'line-through text-text-muted',
+              todo.status === 'done' && 'line-through text-text-muted',
             )}
           >
             {todo.title}
