@@ -1,0 +1,9 @@
+[project]
+name = "rpi-1-research-api"
+version = "0.1.0"
+description = "FastAPI backend for the rpi-1-research stage."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.136.0",
+]
