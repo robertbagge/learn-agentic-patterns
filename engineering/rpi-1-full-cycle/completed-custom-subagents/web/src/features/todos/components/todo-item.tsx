@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { Select } from '../../../components/select'
 import { Button } from '../../../components/button'
 import { PRIORITY_OPTIONS, STATUS_COLUMNS, type Priority, type Status, type Todo } from '../types'
+import { PRIORITY_BADGE } from '../priority'
 
 type Props = {
   todo: Todo
@@ -11,12 +12,6 @@ type Props = {
   onPriorityChange: (priority: Priority) => void
   onRequestDelete: () => void
   disabled?: boolean
-}
-
-const PRIORITY_BADGE: Record<Priority, string> = {
-  high: 'bg-accent-destructive-soft text-accent-destructive',
-  medium: 'bg-accent-secondary-soft text-accent-secondary',
-  low: 'bg-accent-primary-soft text-accent-primary',
 }
 
 const STATUS_OPTIONS = STATUS_COLUMNS.map(({ value, label }) => ({ value, label }))
