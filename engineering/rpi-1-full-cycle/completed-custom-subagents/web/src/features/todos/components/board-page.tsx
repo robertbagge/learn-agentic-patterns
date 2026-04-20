@@ -20,13 +20,15 @@ import { BoardCard } from './board-card'
 import { BoardLayout } from './board-layout'
 import { Column } from './column'
 import { ConfirmDeleteDialog } from './confirm-delete-dialog'
+import { TodoCreateDialog } from './todo-create-dialog'
 
 export function BoardPage() {
-  const { todos, move, remove } = useTodos()
+  const { todos, create, move, remove } = useTodos()
   const toast = useToast()
   const [pendingDelete, setPendingDelete] = useState<Todo | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [createFor, setCreateFor] = useState<Status | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -35,8 +37,8 @@ export function BoardPage() {
   const announcements = useMemo(() => makeAnnouncements(todos), [todos])
   const activeCard = activeId ? todos.find((t) => t.id === activeId) ?? null : null
 
-  const handleAdd = (_status: Status) => {
-    // wired in Phase 7 (TodoCreateDialog)
+  const handleAdd = (status: Status) => {
+    setCreateFor(status)
   }
 
   const handleConfirmDelete = async () => {
@@ -117,6 +119,12 @@ export function BoardPage() {
         confirming={deleting}
         onCancel={() => setPendingDelete(null)}
         onConfirm={() => void handleConfirmDelete()}
+      />
+      <TodoCreateDialog
+        open={createFor !== null}
+        defaultStatus={createFor ?? 'todo'}
+        onCreate={create}
+        onClose={() => setCreateFor(null)}
       />
     </main>
   )
