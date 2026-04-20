@@ -14,7 +14,7 @@ const OPTIONS: { value: ViewMode; label: string }[] = [
 export function ViewModeToggle({ value, onChange }: Props) {
   return (
     <div
-      role="tablist"
+      role="radiogroup"
       aria-label="View mode"
       className="inline-flex rounded-sm border border-border-default bg-bg-elevated p-2"
     >
@@ -23,8 +23,8 @@ export function ViewModeToggle({ value, onChange }: Props) {
         return (
           <button
             key={opt.value}
-            role="tab"
-            aria-selected={active}
+            role="radio"
+            aria-checked={active}
             type="button"
             onClick={() => onChange(opt.value)}
             className={clsx(

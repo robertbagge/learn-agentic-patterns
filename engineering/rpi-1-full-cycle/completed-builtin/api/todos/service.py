@@ -8,6 +8,7 @@ from todos.schemas import ReorderRequest, Status, TodoCreate, TodoUpdate
 
 PRIORITY_RANK = {"high": 3, "medium": 2, "low": 1}
 STATUSES: tuple[Status, ...] = ("todo", "doing", "done")
+STATUS_RANK = {status: index for index, status in enumerate(STATUSES)}
 
 
 def _now() -> str:
@@ -27,7 +28,7 @@ class TodoService:
         items = self._storage.load()
         if self._migrate(items):
             self._storage.save(items)
-        return sorted(items, key=lambda t: (t["position"], t["created_at"]))
+        return sorted(items, key=lambda t: (STATUS_RANK[t["status"]], t["position"], t["created_at"]))
 
     def create(self, data: TodoCreate) -> dict:
         now = _now()
@@ -83,7 +84,7 @@ class TodoService:
             todo["position"] = index
             todo["updated_at"] = now
         self._storage.save(items)
-        return sorted(items, key=lambda t: (t["position"], t["created_at"]))
+        return sorted(items, key=lambda t: (STATUS_RANK[t["status"]], t["position"], t["created_at"]))
 
     @staticmethod
     def _migrate(items: list[dict]) -> bool:

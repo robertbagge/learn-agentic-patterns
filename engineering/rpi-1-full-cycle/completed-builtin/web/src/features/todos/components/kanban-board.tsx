@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -15,11 +15,19 @@ import { ErrorState } from '../../../components/error-state'
 import { Skeleton } from '../../../components/skeleton'
 import { useToast } from '../../../components/toast'
 import { ConfirmDeleteDialog } from './confirm-delete-dialog'
-import { KanbanCard } from './kanban-card'
+import { KanbanCard, KanbanCardView } from './kanban-card'
 import { KanbanColumn } from './kanban-column'
+import { useDeleteFlow } from '../hooks/use-delete-flow'
 import { useKanban } from '../hooks/use-kanban'
+import { useTodoMutations } from '../hooks/use-todo-mutations'
 import type { UseTodosResult } from '../hooks/use-todos'
 import { STATUS_COLUMNS, type Status, type Todo, type TodoUpdate } from '../types'
+
+const STATUS_VALUES: Status[] = STATUS_COLUMNS.map((c) => c.value)
+const isStatus = (v: string): v is Status => (STATUS_VALUES as string[]).includes(v)
+const STATUS_LABEL: Record<Status, string> = Object.fromEntries(
+  STATUS_COLUMNS.map((c) => [c.value, c.label] as const),
+) as Record<Status, string>
 
 type Props = {
   todos: Todo[]
@@ -34,57 +42,39 @@ type Props = {
 export function KanbanBoard({ todos, status, error, onRetry, onUpdate, onRemove, onReorder }: Props) {
   const toast = useToast()
   const { columns, moveCard } = useKanban(todos, onReorder)
+  const { busyIds, rename, prioritize } = useTodoMutations(onUpdate)
+  const deleteFlow = useDeleteFlow(onRemove)
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [pendingDelete, setPendingDelete] = useState<Todo | null>(null)
-  const [deleting, setDeleting] = useState(false)
-  const [busyIds, setBusyIds] = useState<Set<string>>(new Set())
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
-  const withBusy = async <T,>(id: string, fn: () => Promise<T>): Promise<T | undefined> => {
-    setBusyIds((prev) => new Set(prev).add(id))
-    try {
-      return await fn()
-    } catch (err) {
-      toast.show(err instanceof Error ? err.message : 'Something went wrong', 'error')
-      return undefined
-    } finally {
-      setBusyIds((prev) => {
-        const next = new Set(prev)
-        next.delete(id)
-        return next
-      })
+  const announcements = useMemo(() => {
+    const describe = (id: string | number) => {
+      const todo = todos.find((t) => t.id === String(id))
+      return todo ? `"${todo.title}"` : `card ${id}`
     }
-  }
-
-  const handleRename = (todo: Todo, title: string) =>
-    withBusy(todo.id, async () => {
-      await onUpdate(todo.id, { title })
-      toast.show('Task updated')
-    })
-
-  const handlePriority = (todo: Todo, priority: Todo['priority']) =>
-    withBusy(todo.id, async () => {
-      await onUpdate(todo.id, { priority })
-      toast.show('Priority updated')
-    })
-
-  const handleConfirmDelete = async () => {
-    if (!pendingDelete) return
-    setDeleting(true)
-    try {
-      await onRemove(pendingDelete.id)
-      toast.show('Task deleted')
-      setPendingDelete(null)
-    } catch (err) {
-      toast.show(err instanceof Error ? err.message : 'Failed to delete task', 'error')
-    } finally {
-      setDeleting(false)
+    const describeTarget = (id: string | number) => {
+      const str = String(id)
+      if (isStatus(str)) return `the ${STATUS_LABEL[str]} column`
+      return describe(id)
     }
-  }
+    return {
+      onDragStart: ({ active }: { active: { id: string | number } }) => `Picked up ${describe(active.id)}.`,
+      onDragOver: ({ active, over }: { active: { id: string | number }; over: { id: string | number } | null }) =>
+        over
+          ? `${describe(active.id)} is over ${describeTarget(over.id)}.`
+          : `${describe(active.id)} is no longer over a drop target.`,
+      onDragEnd: ({ active, over }: { active: { id: string | number }; over: { id: string | number } | null }) =>
+        over
+          ? `${describe(active.id)} was dropped over ${describeTarget(over.id)}.`
+          : `${describe(active.id)} was dropped outside any column.`,
+      onDragCancel: ({ active }: { active: { id: string | number } }) =>
+        `Drag of ${describe(active.id)} was cancelled.`,
+    }
+  }, [todos])
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(String(event.active.id))
@@ -101,12 +91,11 @@ export function KanbanBoard({ todos, status, error, onRetry, onUpdate, onRemove,
     const moving = todos.find((t) => t.id === activeIdStr)
     if (!moving) return
 
-    const statusKeys = STATUS_COLUMNS.map((c) => c.value) as Status[]
     let toStatus: Status
     let toIndex: number
 
-    if (statusKeys.includes(overIdStr as Status)) {
-      toStatus = overIdStr as Status
+    if (isStatus(overIdStr)) {
+      toStatus = overIdStr
       toIndex = columns[toStatus].length
     } else {
       const overTodo = todos.find((t) => t.id === overIdStr)
@@ -151,6 +140,7 @@ export function KanbanBoard({ todos, status, error, onRetry, onUpdate, onRemove,
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
+        accessibility={{ announcements }}
         onDragStart={handleDragStart}
         onDragEnd={(e) => void handleDragEnd(e)}
         onDragCancel={() => setActiveId(null)}
@@ -162,9 +152,9 @@ export function KanbanBoard({ todos, status, error, onRetry, onUpdate, onRemove,
                 <KanbanCard
                   key={todo.id}
                   todo={todo}
-                  onRename={(title) => handleRename(todo, title)}
-                  onPriorityChange={(priority) => void handlePriority(todo, priority)}
-                  onRequestDelete={() => setPendingDelete(todo)}
+                  onRename={(title) => rename(todo, title)}
+                  onPriorityChange={(priority) => void prioritize(todo, priority)}
+                  onRequestDelete={() => deleteFlow.request(todo)}
                   disabled={busyIds.has(todo.id)}
                 />
               ))}
@@ -172,23 +162,15 @@ export function KanbanBoard({ todos, status, error, onRetry, onUpdate, onRemove,
           ))}
         </div>
         <DragOverlay>
-          {activeTodo ? (
-            <KanbanCard
-              todo={activeTodo}
-              onRename={() => {}}
-              onPriorityChange={() => {}}
-              onRequestDelete={() => {}}
-              dragging
-            />
-          ) : null}
+          {activeTodo ? <KanbanCardView todo={activeTodo} dragging /> : null}
         </DragOverlay>
       </DndContext>
       <ConfirmDeleteDialog
-        title={pendingDelete?.title ?? ''}
-        open={pendingDelete !== null}
-        confirming={deleting}
-        onCancel={() => setPendingDelete(null)}
-        onConfirm={() => void handleConfirmDelete()}
+        title={deleteFlow.pending?.title ?? ''}
+        open={deleteFlow.pending !== null}
+        confirming={deleteFlow.deleting}
+        onCancel={deleteFlow.cancel}
+        onConfirm={() => void deleteFlow.confirm()}
       />
     </>
   )

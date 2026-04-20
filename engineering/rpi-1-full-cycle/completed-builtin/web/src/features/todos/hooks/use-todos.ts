@@ -8,7 +8,7 @@ export type UseTodosResult = {
   todos: Todo[]
   status: LoadStatus
   error: string | null
-  refetch: () => Promise<void>
+  refetch: (opts?: { quiet?: boolean }) => Promise<void>
   create: (body: TodoCreate) => Promise<Todo>
   update: (id: string, body: TodoUpdate) => Promise<Todo>
   remove: (id: string) => Promise<void>
@@ -20,8 +20,8 @@ export function useTodos(): UseTodosResult {
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [error, setError] = useState<string | null>(null)
 
-  const refetch = useCallback(async () => {
-    setStatus('loading')
+  const refetch = useCallback(async (opts?: { quiet?: boolean }) => {
+    if (!opts?.quiet) setStatus('loading')
     setError(null)
     try {
       const items = await todosApi.list()
@@ -71,7 +71,7 @@ export function useTodos(): UseTodosResult {
         setTodos(items)
         return items
       } catch (e) {
-        await refetch()
+        await refetch({ quiet: true })
         throw e
       }
     },
