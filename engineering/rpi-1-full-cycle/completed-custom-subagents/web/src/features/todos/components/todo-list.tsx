@@ -7,7 +7,7 @@ import { Skeleton } from '../../../components/skeleton'
 import { useToast } from '../../../components/toast'
 import { ConfirmDeleteDialog } from './confirm-delete-dialog'
 import { TodoItem } from './todo-item'
-import type { Todo, TodoUpdate } from '../types'
+import type { Status, Todo, TodoUpdate } from '../types'
 
 type Props = {
   todos: Todo[]
@@ -41,11 +41,10 @@ export function TodoList({ todos, status, error, onRetry, onUpdate, onRemove, on
     }
   }
 
-  const handleToggle = (todo: Todo) =>
+  const handleStatusChange = (todo: Todo, status: Status) =>
     withBusy(todo.id, async () => {
-      const nextStatus = todo.status === 'done' ? 'todo' : 'done'
-      await onUpdate(todo.id, { status: nextStatus })
-      toast.show(todo.status === 'done' ? 'Marked incomplete' : 'Marked complete')
+      await onUpdate(todo.id, { status })
+      toast.show('Status updated')
     })
 
   const handleRename = (todo: Todo, title: string) =>
@@ -111,7 +110,7 @@ export function TodoList({ todos, status, error, onRetry, onUpdate, onRemove, on
               <li key={todo.id}>
                 <TodoItem
                   todo={todo}
-                  onToggle={() => void handleToggle(todo)}
+                  onStatusChange={(status) => void handleStatusChange(todo, status)}
                   onRename={(title) => handleRename(todo, title)}
                   onPriorityChange={(priority) => void handlePriority(todo, priority)}
                   onRequestDelete={() => setPendingDelete(todo)}

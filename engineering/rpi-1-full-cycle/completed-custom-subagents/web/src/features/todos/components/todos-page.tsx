@@ -9,14 +9,9 @@ export function TodosPage() {
 
   return (
     <main className="mx-auto flex max-w-[720px] flex-col gap-32 px-24 py-48">
-      <header className="flex flex-col gap-4">
-        <h1 className="font-display text-[38px] font-bold leading-none tracking-[-1.5px] text-text-primary">
-          Todos
-        </h1>
-        <p className="text-sm text-text-secondary">
-          {status === 'success' ? `${todos.length} task${todos.length === 1 ? '' : 's'}` : ' '}
-        </p>
-      </header>
+      <p className="text-sm text-text-secondary">
+        {status === 'success' ? `${todos.length} task${todos.length === 1 ? '' : 's'}` : ' '}
+      </p>
       <TodoCreateForm ref={createInputRef} onCreate={create} />
       <TodoList
         todos={todos}

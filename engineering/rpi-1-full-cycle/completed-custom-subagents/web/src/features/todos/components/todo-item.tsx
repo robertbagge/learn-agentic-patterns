@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import clsx from 'clsx'
-import { Checkbox } from '../../../components/checkbox'
 import { Select } from '../../../components/select'
 import { Button } from '../../../components/button'
-import { PRIORITY_OPTIONS, type Priority, type Todo } from '../types'
+import { PRIORITY_OPTIONS, STATUS_COLUMNS, type Priority, type Status, type Todo } from '../types'
 
 type Props = {
   todo: Todo
-  onToggle: () => void
+  onStatusChange: (status: Status) => void
   onRename: (title: string) => Promise<void> | void
   onPriorityChange: (priority: Priority) => void
   onRequestDelete: () => void
@@ -20,9 +19,11 @@ const PRIORITY_BADGE: Record<Priority, string> = {
   low: 'bg-accent-primary-soft text-accent-primary',
 }
 
+const STATUS_OPTIONS = STATUS_COLUMNS.map(({ value, label }) => ({ value, label }))
+
 export function TodoItem({
   todo,
-  onToggle,
+  onStatusChange,
   onRename,
   onPriorityChange,
   onRequestDelete,
@@ -67,11 +68,14 @@ export function TodoItem({
 
   return (
     <div className="flex items-center gap-12 py-12 border-b border-border-default last:border-b-0">
-      <Checkbox
-        checked={todo.status === 'done'}
-        onChange={onToggle}
+      <Select
+        name={`status-${todo.id}`}
+        value={todo.status}
+        onChange={(e) => onStatusChange(e.target.value as Status)}
+        options={STATUS_OPTIONS}
         disabled={disabled}
-        aria-label={`Mark "${todo.title}" ${todo.status === 'done' ? 'incomplete' : 'complete'}`}
+        aria-label={`Status for "${todo.title}"`}
+        className="w-[100px]"
       />
       <div className="flex-1 min-w-0">
         {editing ? (
