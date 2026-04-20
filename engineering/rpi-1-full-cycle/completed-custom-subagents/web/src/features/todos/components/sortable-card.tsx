@@ -18,7 +18,17 @@ export function SortableCard({ todo, onRequestDelete }: Props) {
     opacity: isDragging ? 0 : 1,
   }
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={
+        isDragging
+          ? 'rounded-md cursor-grabbing focus-visible:outline-2 focus-visible:outline-border-accent focus-visible:outline-offset-2'
+          : 'rounded-md cursor-grab focus-visible:outline-2 focus-visible:outline-border-accent focus-visible:outline-offset-2'
+      }
+      {...attributes}
+      {...listeners}
+    >
       <BoardCard todo={todo} onRequestDelete={onRequestDelete} />
     </div>
   )

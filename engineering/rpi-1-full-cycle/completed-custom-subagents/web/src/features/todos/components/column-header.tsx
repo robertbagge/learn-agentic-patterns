@@ -1,4 +1,5 @@
 import { Button } from '../../../components/button'
+import { PlusIcon } from '../icons'
 
 type Props = {
   label: string
@@ -14,10 +15,7 @@ export function ColumnHeader({ label, count, onAdd }: Props) {
         <span className="text-sm text-text-secondary">{count}</span>
       </div>
       <Button intent="ghost" size="sm" onClick={onAdd} aria-label={`Add task to ${label}`}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 5v14" />
-          <path d="M5 12h14" />
-        </svg>
+        <PlusIcon />
       </Button>
     </header>
   )

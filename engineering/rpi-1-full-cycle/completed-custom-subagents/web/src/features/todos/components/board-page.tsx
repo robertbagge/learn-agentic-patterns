@@ -39,8 +39,8 @@ export function BoardPage() {
   const announcements = useMemo(() => makeAnnouncements(todos), [todos])
   const activeCard = activeId ? todos.find((t) => t.id === activeId) ?? null : null
 
-  const handleAdd = (status: Status) => {
-    setCreateFor(status)
+  const handleAdd = (columnStatus: Status) => {
+    setCreateFor(columnStatus)
   }
 
   const handleConfirmDelete = async () => {
@@ -78,6 +78,8 @@ export function BoardPage() {
       }
     } catch (err) {
       toast.show(err instanceof Error ? err.message : 'Failed to move task', 'error')
+      // Resync from server: a multi-move batch may have partially applied.
+      await refetch()
     }
   }
 
@@ -137,7 +139,9 @@ export function BoardPage() {
             ))}
           </BoardLayout>
           <DragOverlay>
-            {activeCard ? <BoardCard todo={activeCard} onRequestDelete={() => {}} /> : null}
+            {activeCard ? (
+              <BoardCard todo={activeCard} onRequestDelete={() => {}} hideActions />
+            ) : null}
           </DragOverlay>
         </DndContext>
       )}

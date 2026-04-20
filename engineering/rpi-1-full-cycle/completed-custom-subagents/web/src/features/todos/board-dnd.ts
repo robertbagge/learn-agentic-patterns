@@ -1,28 +1,58 @@
 import type { Announcements, DragEndEvent } from '@dnd-kit/core'
-import { computeDropPosition } from './position'
+import { arrayMove } from '@dnd-kit/sortable'
+import { POSITION_STEP } from './position'
 import { STATUS_COLUMNS, type Status, type Todo } from './types'
 
 export type DragMove = { id: string; status: Status; position: number }
 export type DragEndResult = { moves: DragMove[] }
 
 const COLUMN_PREFIX = 'column:'
-const POSITION_STEP = 1000
+const STATUS_VALUES = new Set<string>(STATUS_COLUMNS.map((c) => c.value))
 
-function resolveDestination(
-  overId: string,
-  todos: Todo[],
-): { status: Status; overCardId: string | null } | null {
+function parseStatus(candidate: string): Status | null {
+  return STATUS_VALUES.has(candidate) ? (candidate as Status) : null
+}
+
+type Destination = { status: Status; overCardId: string | null }
+
+function resolveDestination(overId: string, todos: Todo[]): Destination | null {
   if (overId.startsWith(COLUMN_PREFIX)) {
-    const status = overId.slice(COLUMN_PREFIX.length) as Status
-    return { status, overCardId: null }
+    const status = parseStatus(overId.slice(COLUMN_PREFIX.length))
+    return status ? { status, overCardId: null } : null
   }
   const target = todos.find((t) => t.id === overId)
-  if (!target) return null
-  return { status: target.status, overCardId: target.id }
+  return target ? { status: target.status, overCardId: target.id } : null
 }
 
 function sortedColumn(todos: Todo[], status: Status): Todo[] {
   return todos.filter((t) => t.status === status).sort((a, b) => a.position - b.position)
+}
+
+function computeFinalColumn(
+  destColumn: Todo[],
+  activeTodo: Todo,
+  dest: Destination,
+): { finalColumn: Todo[]; newIndex: number } {
+  const oldIndex = destColumn.findIndex((t) => t.id === activeTodo.id)
+  const overIndex =
+    dest.overCardId === null
+      ? destColumn.length
+      : destColumn.findIndex((t) => t.id === dest.overCardId)
+
+  if (oldIndex !== -1) {
+    // Same-column: use dnd-kit sortable arrayMove semantics.
+    const finalColumn = arrayMove(destColumn, oldIndex, overIndex)
+    return { finalColumn, newIndex: finalColumn.findIndex((t) => t.id === activeTodo.id) }
+  }
+
+  // Cross-column: insert active at overIndex (or bottom if dropped on the column body).
+  const target = overIndex < 0 ? destColumn.length : overIndex
+  const finalColumn = [
+    ...destColumn.slice(0, target),
+    { ...activeTodo, status: dest.status },
+    ...destColumn.slice(target),
+  ]
+  return { finalColumn, newIndex: target }
 }
 
 export function handleDragEnd(event: DragEndEvent, todos: Todo[]): DragEndResult | null {
@@ -38,37 +68,33 @@ export function handleDragEnd(event: DragEndEvent, todos: Todo[]): DragEndResult
   if (!dest) return null
 
   const sameColumn = activeTodo.status === dest.status
-  const droppedOnSelf = dest.overCardId === activeId
-  if (sameColumn && droppedOnSelf) return null
+  if (sameColumn && dest.overCardId === activeId) return null
 
-  const { position, needsRenumber } = computeDropPosition(todos, dest.status, dest.overCardId)
+  const destColumn = sortedColumn(todos, dest.status)
+  const { finalColumn, newIndex } = computeFinalColumn(destColumn, activeTodo, dest)
+
+  const prev = newIndex === 0 ? 0 : finalColumn[newIndex - 1].position
+  const nextItem = finalColumn[newIndex + 1]
+
+  const needsRenumber = nextItem !== undefined && nextItem.position - prev <= 1
+  const position = nextItem === undefined ? prev + POSITION_STEP : Math.floor((prev + nextItem.position) / 2)
 
   if (!needsRenumber) {
     if (sameColumn && activeTodo.position === position) return null
     return { moves: [{ id: activeId, status: dest.status, position }] }
   }
 
-  const destColumn = sortedColumn(todos, dest.status).filter((t) => t.id !== activeId)
-  const insertIndex =
-    dest.overCardId === null
-      ? destColumn.length
-      : Math.max(
-          0,
-          destColumn.findIndex((t) => t.id === dest.overCardId),
-        )
-  const finalOrder: Todo[] = [
-    ...destColumn.slice(0, insertIndex),
-    activeTodo,
-    ...destColumn.slice(insertIndex),
-  ]
-
-  const moves: DragMove[] = finalOrder.map((t, i) => ({
-    id: t.id,
-    status: dest.status,
-    position: (i + 1) * POSITION_STEP,
-  }))
-
-  return { moves }
+  // Renumber destination column — emit moves only for rows whose status or position actually changes.
+  const moves: DragMove[] = []
+  for (let i = 0; i < finalColumn.length; i++) {
+    const todo = finalColumn[i]
+    const newPosition = (i + 1) * POSITION_STEP
+    const current = todos.find((t) => t.id === todo.id)
+    if (!current || current.position !== newPosition || current.status !== dest.status) {
+      moves.push({ id: todo.id, status: dest.status, position: newPosition })
+    }
+  }
+  return moves.length > 0 ? { moves } : null
 }
 
 function columnLabel(status: Status): string {
@@ -81,29 +107,18 @@ function announceTarget(
   activeId: string,
 ): { label: string; index: number; size: number } | null {
   if (overId === null) return null
-  let destStatus: Status | null = null
-  let overCardId: string | null = null
-  if (overId.startsWith(COLUMN_PREFIX)) {
-    destStatus = overId.slice(COLUMN_PREFIX.length) as Status
-  } else {
-    const target = todos.find((t) => t.id === overId)
-    if (!target) return null
-    destStatus = target.status
-    overCardId = target.id
-  }
+  const activeTodo = todos.find((t) => t.id === activeId)
+  if (!activeTodo) return null
 
-  const columnAfter = sortedColumn(todos, destStatus).filter((t) => t.id !== activeId)
-  const insertIndex =
-    overCardId === null
-      ? columnAfter.length
-      : Math.max(
-          0,
-          columnAfter.findIndex((t) => t.id === overCardId),
-        )
+  const dest = resolveDestination(overId, todos)
+  if (!dest) return null
+
+  const destColumn = sortedColumn(todos, dest.status)
+  const { newIndex, finalColumn } = computeFinalColumn(destColumn, activeTodo, dest)
   return {
-    label: columnLabel(destStatus),
-    index: insertIndex + 1,
-    size: columnAfter.length + 1,
+    label: columnLabel(dest.status),
+    index: newIndex + 1,
+    size: finalColumn.length,
   }
 }
 

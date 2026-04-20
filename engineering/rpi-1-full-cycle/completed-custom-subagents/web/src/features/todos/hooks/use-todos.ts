@@ -1,6 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type MutableRefObject,
+  type SetStateAction,
+} from 'react'
 import { todosApi } from '../api'
-import { computeDropPosition } from '../position'
+import { appendPosition } from '../position'
 import type { Status, Todo, TodoCreate, TodoMove, TodoUpdate } from '../types'
 
 type LoadStatus = 'loading' | 'success' | 'error'
@@ -16,14 +24,43 @@ export type UseTodosResult = {
   remove: (id: string) => Promise<void>
 }
 
+type OptimisticSpec<T> = {
+  optimistic: (prev: Todo[]) => Todo[]
+  request: () => Promise<T>
+  reconcile: (result: T) => (prev: Todo[]) => Todo[]
+  rollback: (prev: Todo[]) => Todo[]
+}
+
+async function withOptimistic<T>(
+  setTodos: Dispatch<SetStateAction<Todo[]>>,
+  inFlightRef: MutableRefObject<number>,
+  spec: OptimisticSpec<T>,
+): Promise<T> {
+  inFlightRef.current++
+  try {
+    setTodos(spec.optimistic)
+    const result = await spec.request()
+    setTodos(spec.reconcile(result))
+    return result
+  } catch (e) {
+    setTodos(spec.rollback)
+    throw e
+  } finally {
+    inFlightRef.current--
+  }
+}
+
 export function useTodos(): UseTodosResult {
   const [todos, setTodos] = useState<Todo[]>([])
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [error, setError] = useState<string | null>(null)
 
-  const snapshotsRef = useRef<Map<string, Todo>>(new Map())
-  const tempIdsRef = useRef<Set<string>>(new Set())
+  const todosRef = useRef<Todo[]>([])
   const inFlightRef = useRef(0)
+
+  useEffect(() => {
+    todosRef.current = todos
+  }, [todos])
 
   const refetch = useCallback(async () => {
     if (inFlightRef.current > 0) return
@@ -47,122 +84,59 @@ export function useTodos(): UseTodosResult {
     const tempId = `temp-${crypto.randomUUID()}`
     const destStatus: Status = body.status ?? 'todo'
     const now = new Date().toISOString()
-
-    inFlightRef.current++
-    tempIdsRef.current.add(tempId)
-
-    try {
-      setTodos((prev) => {
-        const { position } = computeDropPosition(prev, destStatus, null)
-        const optimistic: Todo = {
+    return withOptimistic(setTodos, inFlightRef, {
+      optimistic: (prev) => [
+        ...prev,
+        {
           id: tempId,
           title: body.title,
           priority: body.priority ?? 'medium',
           status: destStatus,
-          position,
+          position: appendPosition(prev, destStatus),
           created_at: now,
           updated_at: now,
-        }
-        return [...prev, optimistic]
-      })
-
-      const serverTodo = await todosApi.create(body)
-      setTodos((prev) => prev.map((t) => (t.id === tempId ? serverTodo : t)))
-      tempIdsRef.current.delete(tempId)
-      return serverTodo
-    } catch (e) {
-      setTodos((prev) => prev.filter((t) => t.id !== tempId))
-      tempIdsRef.current.delete(tempId)
-      throw e
-    } finally {
-      inFlightRef.current--
-    }
+        },
+      ],
+      request: () => todosApi.create(body),
+      reconcile: (serverTodo) => (prev) => prev.map((t) => (t.id === tempId ? serverTodo : t)),
+      rollback: (prev) => prev.filter((t) => t.id !== tempId),
+    })
   }, [])
 
   const update = useCallback(async (id: string, body: TodoUpdate) => {
-    inFlightRef.current++
-    let snapshot: Todo | undefined
-
-    try {
-      setTodos((prev) => {
-        const current = prev.find((t) => t.id === id)
-        if (current) {
-          snapshot = current
-          snapshotsRef.current.set(id, current)
-        }
-        return prev.map((t) => (t.id === id ? { ...t, ...body } : t))
-      })
-
-      const serverTodo = await todosApi.update(id, body)
-      setTodos((prev) => prev.map((t) => (t.id === id ? serverTodo : t)))
-      snapshotsRef.current.delete(id)
-      return serverTodo
-    } catch (e) {
-      if (snapshot) setTodos((prev) => prev.map((t) => (t.id === id ? snapshot! : t)))
-      snapshotsRef.current.delete(id)
-      throw e
-    } finally {
-      inFlightRef.current--
-    }
+    const snapshot = todosRef.current.find((t) => t.id === id)
+    return withOptimistic(setTodos, inFlightRef, {
+      optimistic: (prev) => prev.map((t) => (t.id === id ? { ...t, ...body } : t)),
+      request: () => todosApi.update(id, body),
+      reconcile: (serverTodo) => (prev) => prev.map((t) => (t.id === id ? serverTodo : t)),
+      rollback: (prev) => (snapshot ? prev.map((t) => (t.id === id ? snapshot : t)) : prev),
+    })
   }, [])
 
   const move = useCallback(async (id: string, body: TodoMove) => {
-    inFlightRef.current++
-    let snapshot: Todo | undefined
-
-    try {
-      setTodos((prev) => {
-        const current = prev.find((t) => t.id === id)
-        if (current) {
-          snapshot = current
-          snapshotsRef.current.set(id, current)
-        }
-        return prev.map((t) =>
+    const snapshot = todosRef.current.find((t) => t.id === id)
+    return withOptimistic(setTodos, inFlightRef, {
+      optimistic: (prev) =>
+        prev.map((t) =>
           t.id === id ? { ...t, status: body.status, position: body.position } : t,
-        )
-      })
-
-      const serverTodo = await todosApi.move(id, body)
-      setTodos((prev) => prev.map((t) => (t.id === id ? serverTodo : t)))
-      snapshotsRef.current.delete(id)
-      return serverTodo
-    } catch (e) {
-      if (snapshot) setTodos((prev) => prev.map((t) => (t.id === id ? snapshot! : t)))
-      snapshotsRef.current.delete(id)
-      throw e
-    } finally {
-      inFlightRef.current--
-    }
+        ),
+      request: () => todosApi.move(id, body),
+      reconcile: (serverTodo) => (prev) => prev.map((t) => (t.id === id ? serverTodo : t)),
+      rollback: (prev) => (snapshot ? prev.map((t) => (t.id === id ? snapshot : t)) : prev),
+    })
   }, [])
 
   const remove = useCallback(async (id: string) => {
-    inFlightRef.current++
-    let snapshot: Todo | undefined
-
-    try {
-      setTodos((prev) => {
-        const current = prev.find((t) => t.id === id)
-        if (current) {
-          snapshot = current
-          snapshotsRef.current.set(id, current)
-        }
-        return prev.filter((t) => t.id !== id)
-      })
-
-      await todosApi.remove(id)
-      snapshotsRef.current.delete(id)
-    } catch (e) {
-      if (snapshot) {
-        setTodos((prev) => {
-          if (prev.some((t) => t.id === id)) return prev
-          return [...prev, snapshot!]
-        })
-      }
-      snapshotsRef.current.delete(id)
-      throw e
-    } finally {
-      inFlightRef.current--
-    }
+    const snapshot = todosRef.current.find((t) => t.id === id)
+    await withOptimistic(setTodos, inFlightRef, {
+      optimistic: (prev) => prev.filter((t) => t.id !== id),
+      request: () => todosApi.remove(id),
+      reconcile: () => (prev) => prev,
+      rollback: (prev) => {
+        if (!snapshot || prev.some((t) => t.id === id)) return prev
+        return [...prev, snapshot]
+      },
+    })
   }, [])
 
   return { todos, status, error, refetch, create, update, move, remove }

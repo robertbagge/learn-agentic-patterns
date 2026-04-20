@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { Button } from '../../../components/button'
+import { Modal } from '../../../components/modal'
 
 type Props = {
   title: string
@@ -10,32 +10,8 @@ type Props = {
 }
 
 export function ConfirmDeleteDialog({ title, open, onCancel, onConfirm, confirming }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    if (open && !dialog.open) dialog.showModal()
-    if (!open && dialog.open) dialog.close()
-  }, [open])
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    const handleCancel = (e: Event) => {
-      e.preventDefault()
-      onCancel()
-    }
-    dialog.addEventListener('cancel', handleCancel)
-    return () => dialog.removeEventListener('cancel', handleCancel)
-  }, [onCancel])
-
   return (
-    <dialog
-      ref={dialogRef}
-      aria-labelledby="confirm-delete-title"
-      className="bg-bg-card text-text-primary rounded-lg p-24 border border-border-default backdrop:bg-black/60 max-w-[400px]"
-    >
+    <Modal open={open} onClose={onCancel} labelledBy="confirm-delete-title">
       <div className="flex flex-col gap-16">
         <h2 id="confirm-delete-title" className="font-display text-[16px] font-bold">
           Delete task?
@@ -52,6 +28,6 @@ export function ConfirmDeleteDialog({ title, open, onCancel, onConfirm, confirmi
           </Button>
         </div>
       </div>
-    </dialog>
+    </Modal>
   )
 }

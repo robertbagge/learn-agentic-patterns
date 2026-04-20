@@ -14,20 +14,24 @@ def list_todos(service: TodoServiceDep) -> list[TodoResponse]:
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_todo(body: TodoCreate, service: TodoServiceDep) -> TodoResponse:
+    """Concurrency: last-writer-wins (no version/ETag check)."""
     return TodoResponse.model_validate(service.create(body))
 
 
 @router.patch("/{todo_id}")
 def update_todo(todo_id: str, body: TodoUpdate, service: TodoServiceDep) -> TodoResponse:
+    """Concurrency: last-writer-wins (no version/ETag check)."""
     return TodoResponse.model_validate(service.update(todo_id, body))
 
 
 @router.patch("/{todo_id}/move")
 def move_todo(todo_id: str, body: TodoMove, service: TodoServiceDep) -> TodoResponse:
+    """Concurrency: last-writer-wins (no version/ETag check)."""
     return TodoResponse.model_validate(service.move(todo_id, body))
 
 
 @router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_todo(todo_id: str, service: TodoServiceDep) -> Response:
+    """Concurrency: last-writer-wins (no version/ETag check)."""
     service.delete(todo_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
