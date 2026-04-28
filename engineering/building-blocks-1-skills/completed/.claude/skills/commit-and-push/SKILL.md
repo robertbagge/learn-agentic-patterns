@@ -18,6 +18,10 @@ capability and infra layers are for.
    tree, proposes the smallest coherent commit chunks, and waits for the
    user to approve or edit the plan. Capture the approved plan.
 
+2. **(Conditional)** If you are not on a feature branch, invoke `/branch` to create one. The branch
+   name should reflect the overall intent of the change, not the individual
+   commit chunks.
+
 2. **Commit each chunk.** For each chunk in the approved plan, in order:
 
    ```

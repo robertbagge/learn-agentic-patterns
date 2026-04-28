@@ -1,7 +1,6 @@
 # Pull Request Template
 
-The `/pr` skill fills this template with the branch's changes and uses the
-result as the PR body.
+Template to be used for creating pull-request descriptions.
 
 ```markdown
 ## Summary
