@@ -101,7 +101,7 @@ export function TodoList({ todos, status, error, onRetry, onUpdate, onRemove, on
           <EmptyState
             title="No tasks yet"
             message="Add your first task to get started."
-            action={<Button onClick={onEmptyCreate}>Add your first task</Button>}
+            action={<Button onClick={onEmptyCreate}>Create your first task</Button>}
           />
         )}
         {status === 'success' && total > 0 && (
