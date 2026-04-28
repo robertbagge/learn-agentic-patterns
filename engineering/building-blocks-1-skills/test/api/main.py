@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.exceptions import register_exception_handlers
 from todos.router import router as todos_router
 
-app = FastAPI()
+app = FastAPI(title="Todos API")
 
 app.add_middleware(
     CORSMiddleware,
