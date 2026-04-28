@@ -1,11 +1,11 @@
 ---
-name: pr-gh
+name: pr-vcs
 description: Run gh pr create for the current branch. Takes a title and a body. Thin shell wrapper with fixed flags and base-branch detection.
 allowed-tools: Bash
 argument-hint: "<title> <body-file>"
 ---
 
-# pr-gh
+# pr-vcs
 
 Infra-layer wrapper around `gh pr create`. Does not write the PR body or
 decide when to open the PR — it just runs the shell call with consistent
@@ -21,7 +21,7 @@ body from the repo's template. You usually do not invoke this directly.
 Delegate to the script:
 
 ```bash
-.claude/skills/pr-gh/scripts/create-pr.sh "<title>" <body-file>
+.claude/skills/pr-vcs/scripts/create-pr.sh "<title>" <body-file>
 ```
 
 - `<title>` — PR title (typically the Conventional-Commits subject of the

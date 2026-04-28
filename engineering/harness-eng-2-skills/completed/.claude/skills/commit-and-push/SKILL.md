@@ -25,19 +25,19 @@ capability and infra layers are for.
    ```
 
    The capability skill stages the listed files, writes a
-   Conventional-Commits message, and invokes `commit-gh` to create the
+   Conventional-Commits message, and invokes `commit-vcs` to create the
    commit. Collect the commit hash it reports.
 
 3. **Open the PR.** Invoke `/pr`. It refuses if we're on `main`, pushes
    the branch, renders the PR body from
-   `docs/harness/vcs/pr-template.md`, and invokes `pr-gh` to open the PR.
+   `docs/harness/vcs/pr-template.md`, and invokes `pr-vcs` to open the PR.
 
 4. **Report.** Print one line per commit (`<hash>  <subject>`) followed
    by the PR URL from `/pr`.
 
 ## Constraints
 
-- Never invokes infra skills (`commit-gh`, `pr-gh`) directly. Always goes
+- Never invokes infra skills (`commit-vcs`, `pr-vcs`) directly. Always goes
   through the capability layer.
 - If the user has not approved `/identify-commits`' plan, stop. The
   orchestration is a coordinator, not a decision-maker.

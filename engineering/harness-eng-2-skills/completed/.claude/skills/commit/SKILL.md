@@ -13,7 +13,7 @@ Create a single git commit that follows this repo's commit conventions.
 
 1. **Scope the change.**
    - If the user passed a file list as arguments, those are the files to
-     commit (stage them via `commit-gh`).
+     commit (stage them via `commit-vcs`).
    - Otherwise, commit whatever is already staged. If nothing is staged
      and no files were passed, ask the user what to commit — do not guess.
 
@@ -34,14 +34,14 @@ Create a single git commit that follows this repo's commit conventions.
      no trailing period.
    - Add a body only if the *why* is non-obvious from the diff.
 
-5. **Delegate to `commit-gh`.** Invoke the infra wrapper with the message
+5. **Delegate to `commit-vcs`.** Invoke the infra wrapper with the message
    and (if applicable) the file list:
 
    ```
-   .claude/skills/commit-gh/scripts/commit.sh "<message>" [<files>]
+   .claude/skills/commit-vcs/scripts/commit.sh "<message>" [<files>]
    ```
 
-6. **Report.** Print the commit hash `commit-gh` returned, plus the
+6. **Report.** Print the commit hash `commit-vcs` returned, plus the
    subject line.
 
 ## Constraints

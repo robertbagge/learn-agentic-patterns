@@ -14,10 +14,10 @@ Six skills, three layers:
 
 | Skill | Layer | Shape |
 |---|---|---|
-| `commit-gh` | Infra | Wraps `git add` + `git commit`. Thin shell script. |
-| `pr-gh` | Infra | Wraps `gh pr create`. Thin shell script. |
-| `commit` | Capability | Writes a Conventional-Commits message, delegates to `commit-gh`. |
-| `pr` | Capability | Pushes the branch, fills the PR template, delegates to `pr-gh`. |
+| `commit-vcs` | Infra | Wraps `git add` + `git commit`. Thin shell script. |
+| `pr-vcs` | Infra | Wraps `gh pr create`. Thin shell script. |
+| `commit` | Capability | Writes a Conventional-Commits message, delegates to `commit-vcs`. |
+| `pr` | Capability | Pushes the branch, fills the PR template, delegates to `pr-vcs`. |
 | `identify-commits` | Capability | Partitions a messy working tree into the smallest coherent commit chunks. |
 | `commit-and-push` | Orchestration | `/identify-commits` → `/commit` per chunk → `/pr`. |
 

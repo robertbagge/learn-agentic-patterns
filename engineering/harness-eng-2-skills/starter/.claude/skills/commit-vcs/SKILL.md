@@ -1,11 +1,11 @@
 ---
-name: commit-gh
+name: commit-vcs
 description: Run git add + git commit in one call. Takes a file list and a commit message. Thin shell wrapper with fixed flags.
 allowed-tools: Bash
 argument-hint: "<message> [--files <f1> <f2> ...]"
 ---
 
-# commit-gh
+# commit-vcs
 
 Infra-layer wrapper around `git add` + `git commit`. Does not decide *what*
 to commit or *what to write* — it just runs the shell call with consistent
@@ -22,7 +22,7 @@ directly — the capability layer is where judgment lives.
 Delegate to the script:
 
 ```bash
-.claude/skills/commit-gh/scripts/commit.sh "<message>" [file1 file2 ...]
+.claude/skills/commit-vcs/scripts/commit.sh "<message>" [file1 file2 ...]
 ```
 
 - `<message>` — the full commit subject (+ optional body, newline-separated).

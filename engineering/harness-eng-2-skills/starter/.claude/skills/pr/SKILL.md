@@ -35,20 +35,20 @@ rendered from this repo's PR template.
    Commits format) as the default title. Show it to the user and accept a
    change if they want one.
 
-5. **Delegate to `pr-gh`.** Invoke the infra wrapper with the title and
+5. **Delegate to `pr-vcs`.** Invoke the infra wrapper with the title and
    body file:
 
    ```
-   .claude/skills/pr-gh/scripts/create-pr.sh "<title>" <body-file>
+   .claude/skills/pr-vcs/scripts/create-pr.sh "<title>" <body-file>
    ```
 
-6. **Report.** Print the PR URL `pr-gh` returned. Clean up the temp body
+6. **Report.** Print the PR URL `pr-vcs` returned. Clean up the temp body
    file.
 
 ## Constraints
 
 - Never opens draft PRs by default. If the user asks for a draft, note
   that the current infra wrapper does not support it and ask whether to
-  extend `pr-gh` or open non-draft.
+  extend `pr-vcs` or open non-draft.
 - Never force-pushes. If the branch and remote have diverged, stop and
   ask.
