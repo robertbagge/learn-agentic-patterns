@@ -1,4 +1,4 @@
-# harness-eng-2-skills
+# building-blocks-1-skills
 
 A layered **skills** stack on top of `rpi-1-full-cycle/completed-custom-subagents`.
 Six skills spanning infra / capability / orchestration wrap a commit + PR

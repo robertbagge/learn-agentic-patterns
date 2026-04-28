@@ -1,4 +1,4 @@
-# harness-eng-2-skills
+# building-blocks-1-skills
 
 Same Vite + FastAPI scaffold + router-style CLAUDE.md + docs tree as
 [`rpi-1-full-cycle/completed-custom-subagents`](../../rpi-1-full-cycle/completed-custom-subagents/),
