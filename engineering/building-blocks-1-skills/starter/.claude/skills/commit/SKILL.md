@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Create a git commit following this repo's conventions (Conventional Commits). Use when the user asks to commit changes. Optional file list scopes the commit.
+description: Create a commit following this repo's conventions (Conventional Commits). Use when the user asks to commit changes. Optional file list scopes the commit.
 allowed-tools: Bash, Read
 argument-hint: "[files...]"
 ---

@@ -11,14 +11,16 @@ branch → open PR.
 ## Flow
 
 This skill is pure composition — it only invokes capability-layer skills.
-Do not shell out to `git` or `gh` directly from here; that's what the
-capability and infra layers are for.
 
 1. **Plan the chunks.** Invoke `/identify-commits`. It reads the working
    tree, proposes the smallest coherent commit chunks, and waits for the
    user to approve or edit the plan. Capture the approved plan.
 
-2. **Commit each chunk.** For each chunk in the approved plan, in order:
+2. **(Conditional) Create branch.** If you are not on a feature branch,
+   invoke `/branch` to create one. The branch name should reflect the
+   overall intent of the change, not the individual commit chunks.
+
+3. **Commit each chunk.** For each chunk in the approved plan, in order:
 
    ```
    /commit <chunk.files...>
@@ -28,11 +30,11 @@ capability and infra layers are for.
    Conventional-Commits message, and invokes `commit-vcs` to create the
    commit. Collect the commit hash it reports.
 
-3. **Open the PR.** Invoke `/pr`. It refuses if we're on `main`, pushes
+4. **Open the PR.** Invoke `/pr`. It refuses if we're on `main`, pushes
    the branch, renders the PR body from
    `docs/harness/vcs/pr-template.md`, and invokes `pr-vcs` to open the PR.
 
-4. **Report.** Print one line per commit (`<hash>  <subject>`) followed
+5. **Report.** Print one line per commit (`<hash>  <subject>`) followed
    by the PR URL from `/pr`.
 
 ## Constraints

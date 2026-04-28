@@ -1,6 +1,6 @@
 ---
 name: branch-vcs
-description: Run git checkout -b with a given branch name. Thin shell wrapper.
+description: Creates a new vcs branch. Should rarely be called directly.
 allowed-tools: Bash
 argument-hint: "<branch-name>"
 ---

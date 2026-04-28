@@ -1,6 +1,6 @@
 ---
 name: pr-vcs
-description: Run gh pr create for the current branch. Takes a title and a body. Thin shell wrapper with fixed flags and base-branch detection.
+description: Opens a vcs pull request. Should rarely be called directly.
 allowed-tools: Bash
 argument-hint: "<title> <body-file>"
 ---

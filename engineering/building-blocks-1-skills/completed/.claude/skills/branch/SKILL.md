@@ -1,6 +1,6 @@
 ---
 name: branch
-description: Create a new feature branch using this repo's Conventional-Commits naming (feat/, fix/, refactor/). Use when the user asks to start work on a new task or create a feature branch.
+description: Create a feature branch using this repo's branch-naming conventions.
 allowed-tools: Bash, Read
 argument-hint: "<short-description>"
 ---

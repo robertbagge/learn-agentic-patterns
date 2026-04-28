@@ -1,6 +1,6 @@
 ---
 name: commit-vcs
-description: Run git add + git commit in one call. Takes a file list and a commit message. Thin shell wrapper with fixed flags.
+description: Creates a vcs commit. Should rarely be called directly.
 allowed-tools: Bash
 argument-hint: "<message> [--files <f1> <f2> ...]"
 ---
